@@ -40,7 +40,15 @@ def is_base_formula(f):
     if is_unary(f.root):
         return is_variable(f.first.root)
     elif is_binary(f.root):
-        return is_variable(f.first.root) and is_variable(f.second.root)
+        if is_unary(f.first.root):
+            return is_variable(f.first.first.root) and is_variable(f.second.root)
+        elif is_unary(f.second.root):
+            return  is_variable(f.first.root) and is_unary(f.second.root) and is_variable(f.second.first.root)
+        else:
+            return (is_variable(f.first.root) and is_variable(f.second.root))
+
+
+
 
 
 def is_unary(s: str) -> bool:

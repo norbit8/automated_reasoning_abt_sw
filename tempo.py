@@ -78,7 +78,7 @@ def convert_to_cnf(formula: List[Formula]):
         if f.second.root == "~":
             dictionary = dict({'q': f.second.first, 'p': f.first})
             new_cnf.append(Formula.substitute_variables(Formula.parse("(q|p)"), dictionary))
-            new_cnf.append(Formula.substitute_variables(Formula.parse("(~p|q)"), dictionary))
+            new_cnf.append(Formula.substitute_variables(Formula.parse("(~p|~q)"), dictionary))
         if f.second.root == "->":
             dictionary = dict({'r': f.second.second, 'q': f.second.first, 'p': f.first})
             if dictionary['q'].root == "~" and dictionary['r'].root == "~":
@@ -87,7 +87,7 @@ def convert_to_cnf(formula: List[Formula]):
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~r|(~p|q))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|p)"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(r|p)"), dictionary))
-            elif dictionary['q'].root:
+            elif dictionary['q'].root == "~":
                 dictionary['q'] = dictionary['q'].first
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(r|(~p|q))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|p)"), dictionary))
@@ -150,24 +150,24 @@ def convert_to_cnf(formula: List[Formula]):
             if dictionary['q'].root == "~" and dictionary['r'].root == "~":
                 dictionary['r'] = dictionary['r'].first
                 dictionary['q'] = dictionary['q'].first
-                new_cnf.append(Formula.substitute_variables(Formula.parse("(q|(r|~p))"), dictionary))
+                new_cnf.append(Formula.substitute_variables(Formula.parse("(q|(r|p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|(~r|p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(r|(~q|~p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(q|(~r|~p))"), dictionary))
             elif dictionary['q'].root == "~":
                 dictionary['q'] = dictionary['q'].first
-                new_cnf.append(Formula.substitute_variables(Formula.parse("(q|(~r|~p))"), dictionary))
+                new_cnf.append(Formula.substitute_variables(Formula.parse("(q|(~r|p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|(r|p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~r|(~q|~p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(q|(r|~p))"), dictionary))
             elif dictionary['r'].root == "~":
                 dictionary['r'] = dictionary['r'].first
-                new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|(r|~p))"), dictionary))
+                new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|(r|p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(q|(~r|p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(r|(q|~p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|(~r|~p))"), dictionary))
             else:
-                new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|(~r|~p))"), dictionary))
+                new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|(~r|p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(q|(r|p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~r|(q|~p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|(r|~p))"), dictionary))

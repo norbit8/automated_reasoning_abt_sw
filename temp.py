@@ -6,9 +6,9 @@ def createDic(f,d,counter):
     phi_G = Formula("x" + str(counter))
     counter+=1
     d[f.id] = phi_G
-    if (is_base_formula(f)):
+    if (is_base_formula(f)) or is_variable(f.root):
         return counter
-    if (is_unary(f.root)):
+    elif (is_unary(f.root)):
        return createDic(f.first, d, counter)
     else:
         counter = createDic(f.first, d, counter)
@@ -16,7 +16,7 @@ def createDic(f,d,counter):
         return counter
 
 def createLis(f,d, lis):
-    if (is_base_formula(f)):
+    if (is_base_formula(f) or is_variable(f.root)):
         f_temp = Formula("<->", d[f.id], f)
         lis.append(f_temp)
         return
@@ -26,7 +26,6 @@ def createLis(f,d, lis):
         lis.append(f_temp)
         createLis(f.first,d, lis)
     else:
-        print(f)
         temp = Formula(f.root, d[f.first.id], d[f.second.id])
         f_temp = Formula("<->", d[f.id] ,temp)
         lis.append(f_temp)
@@ -41,7 +40,7 @@ def get_Tseitinis_list(phi):
     createDic(phi, d, counter)
     lis.append(d[phi.id])
     createLis(phi, d, lis)
-    return lis
+    return lis,d
 
 def get_literal_from_cnf(f):
     literals = []
@@ -138,7 +137,7 @@ def list_to_true_cnf(l):
         return Formula("&",first,second)
 
 def tseitinis_model(f,model, special_dic):
-    if (is_base_formula(f)):
+    if (is_base_formula(f)) or is_variable(f.root):
         model[special_dic[f.id].root] = evaluate(f, model)
     elif (is_unary(f.root)):
         tseitinis_model(f.first, model, special_dic)
@@ -147,8 +146,9 @@ def tseitinis_model(f,model, special_dic):
         tseitinis_model(f.first, model, special_dic)
         tseitinis_model(f.second, model, special_dic)
         model[special_dic[f.id].root] = evaluate(f, model)
+    return model
 
-def compare_formulas(input_formula, ts_formula):
+def compare_formulas(input_formula, ts_formula, special_dict):
     """
     This method gets two formulas, one in regular form and the other one is the first one ts form
     and return True if the second formula is really the ts form of the first one.
@@ -159,20 +159,30 @@ def compare_formulas(input_formula, ts_formula):
     f_input_vars = Formula.variables(input_formula)
     models_original_formula = all_models(list(f_input_vars))
     for model in models_original_formula:
-        ts_model = tseitinis_model(model, None, None)  # TODO: is that the signature of the function?
         result_original_formula = evaluate(input_formula, model)
+        ts_model = tseitinis_model(input_formula, model, special_dict)
         result_ts_formula = evaluate(ts_formula, ts_model)
         if result_original_formula != result_ts_formula:
             return False
     return True
-##Tseitini
-phi = Formula.parse("~((p&q)|~(q|r))")
-Tseitinis_list = get_Tseitinis_list(phi)
-print(Tseitinis_list)
-Tseitinis_list = convert_to_cnf(Tseitinis_list)
-print(Tseitinis_list)
-f1 = list_to_true_cnf(Tseitinis_list)
 
+##Tseitini
+phi = Formula.parse("((~((p|q)|~(q->r))&~q)<->~r13)")
+Tseitinis_list, special_dict = get_Tseitinis_list(phi)
+print(Tseitinis_list)
+f1 = convert_to_cnf(Tseitinis_list)
+print(f1)
+f1 = list_to_true_cnf(f1)
+
+# model = {"p":True, "q":True, "r":True}
+# Tseitinis_list, special_dict = get_Tseitinis_list(phi)
+# tseitinis_model(phi,model, special_dict)
+# print(model)
+
+
+# true_cnf = list_to_true_cnf(convert_to_cnf(Tseitinis_list))
+# print(true_cnf)
+print(compare_formulas(phi, f1, special_dict))
 
 #removal
 # f = Formula.parse("(w1|(r|(q|(r|(w1|~w2)))))")
