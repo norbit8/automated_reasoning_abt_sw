@@ -1,4 +1,5 @@
 from Formula import Formula, is_base_formula, is_unary, is_variable
+from semantics import evaluate
 from tempo import *
 def createDic(f,d,counter):
     phi_G = Formula("x" + str(counter))
@@ -24,7 +25,6 @@ def createLis(f,d, lis):
         lis.append(f_temp)
         createLis(f.first,d, lis)
     else:
-        print(f)
         temp = Formula(f.root, d[f.first.id], d[f.second.id])
         f_temp = Formula("<->", d[f.id] ,temp)
         lis.append(f_temp)
@@ -39,7 +39,7 @@ def get_Tseitinis_list(phi):
     createDic(phi, d, counter)
     lis.append(d[phi.id])
     createLis(phi, d, lis)
-    return lis
+    return lis,d
 
 def get_literal_from_cnf(f):
     literals = []
@@ -135,23 +135,26 @@ def list_to_true_cnf(l):
         first = l[0]
         return Formula("&",first,second)
 
-
-def tseitinis_model(model, special_dic):
-    pass
-
-
-def compare_formulas(input_formula, tseitin_formula):
-    # generate models
-    Formula.variables(input_formula)
-
+def tseitinis_model(f,model, special_dic):
+    if (is_base_formula(f)):
+        model[special_dic[f.id].root] = evaluate(f, model)
+    elif (is_unary(f.root)):
+        tseitinis_model(f.first, model, special_dic)
+        model[special_dic[f.id].root] = evaluate(f, model)
+    else:
+        tseitinis_model(f.first, model, special_dic)
+        tseitinis_model(f.second, model, special_dic)
+        model[special_dic[f.id].root] = evaluate(f, model)
 
 ##Tseitini
 phi = Formula.parse("~((p&q)|~(q|r))")
-Tseitinis_list = get_Tseitinis_list(phi)
-print(Tseitinis_list)
-Tseitinis_list = convert_to_cnf(Tseitinis_list)
-print(Tseitinis_list)
-f1 = list_to_true_cnf(Tseitinis_list)
+model = {"p":True, "q":True, "r":True}
+Tseitinis_list, special_dict = get_Tseitinis_list(phi)
+tseitinis_model(phi,model, special_dict)
+print(model)
+# Tseitinis_list = convert_to_cnf(Tseitinis_list)
+# print(Tseitinis_list)
+# f1 = list_to_true_cnf(Tseitinis_list)
 
 
 #removal

@@ -83,41 +83,41 @@ def evaluate(formula: Formula, model: Model) -> bool:
     # Task 2.1
     formula_string = str(formula)
     # dot1 constant T equivalent to True
-    if formula_string is "T":
+    if formula_string == "T":
         return True
     # dot1 constant F equivalent to False
-    if formula_string is "F":
+    if formula_string == "F":
         return False
     # dot2 if phi is the variable p then return M(p)
     if is_variable(formula_string):
         return model[formula_string]
     # dot3 '~'
-    if formula_string[0] is "~":
+    if formula_string[0] == "~":
         false_counter = 0
         for ch in formula_string:
-            if ch is "~":
+            if ch == "~":
                 false_counter += 1
             else:
                 evalue = evaluate(Formula.parse(formula_string[false_counter:]), model)
                 return evalue if false_counter % 2 == 0 else not evalue
     # dot4 form of a formula >_<
-    if formula_string[0] is "(":
+    if formula_string[0] == "(":
         parsed = Formula.parse_prefix(formula_string[1:])
         lefty = evaluate(parsed[0], model)
         righty = parsed[1]
-        if righty[0] is '&':
+        if righty[0] == '&':
             return and_op(righty, lefty, model)
-        if righty[0] is '|':
+        if righty[0] == '|':
             return or_op(righty, lefty, model)
-        if righty[0] is '-' and righty[1] is '>':
+        if righty[0] == '-' and righty[1] == '>':
             return if_op(righty, lefty, model)
-        if righty[0] is '-' and righty[1] is '|':
+        if righty[0] == '-' and righty[1] == '|':
             return not(or_op(righty[1:], lefty, model))
-        if righty[0] is '-' and righty[1] is '&':
+        if righty[0] == '-' and righty[1] == '&':
             return not(and_op(righty[1:], lefty, model))
-        if righty[0] is '<':
+        if righty[0] == '<':
             return iff_op(righty, lefty, model)
-        if righty[0] is '+':
+        if righty[0] == '+':
             return xor_op(righty, lefty, model)
 
 def all_models(variables: List[str]) -> Iterable[Model]:
