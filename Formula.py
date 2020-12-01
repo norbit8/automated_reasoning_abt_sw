@@ -1,3 +1,7 @@
+from __future__ import annotations
+from typing import Mapping, Optional, Set, Tuple, Union
+
+
 EMPTY_STRING = "Empty string"
 
 INVALID_LETTER = "Invalid letter"
