@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Mapping, Optional, Set, Tuple, Union
-
+import itertools
+from functools import reduce
 
 EMPTY_STRING = "Empty string"
 
@@ -13,6 +14,7 @@ MISSING_PARENT = "Missing ')'"
 UNEXPECTED_SYMBOL = "Unexpected symbol"
 
 
+
 def is_variable(s: str) -> bool:
     """Checks if the given string is an atomic proposition.
     Parameters:
@@ -21,6 +23,8 @@ def is_variable(s: str) -> bool:
         ``True`` if the given string is an atomic proposition, ``False``
         otherwise.
     """
+    if (is_unary(s) or is_binary(s)):
+        return False
     return s[0] >= 'p' and s[0] <= 'z' and (len(s) == 1 or s[1:].isdigit())
 
 def is_constant(s: str) -> bool:
@@ -31,6 +35,13 @@ def is_constant(s: str) -> bool:
         ``True`` if the given string is a constant, ``False`` otherwise.
     """
     return s == 'T' or s == 'F'
+
+def is_base_formula(f):
+    if is_unary(f.root):
+        return is_variable(f.first.root)
+    elif is_binary(f.root):
+        return is_variable(f.first.root) and is_variable(f.second.root)
+
 
 def is_unary(s: str) -> bool:
     """Checks if the given string is a unary operator.
@@ -92,11 +103,11 @@ def open_parentheses(s: str) -> Tuple[Union[Formula, None], str]:
         st = ""
         op = ""
         # NaNd nor and if
-        if pp[1][0] is '-':
+        if pp[1][0] == '-':
             st = pp[1][2:]
             op = pp[1][:2]
         # iff
-        elif pp[1][0] is '<':
+        elif pp[1][0] == '<':
             st = pp[1][3:]
             op = pp[1][:3]
         else:
@@ -111,7 +122,7 @@ def open_parentheses(s: str) -> Tuple[Union[Formula, None], str]:
 
 
 def sub_op(res, p, substitution_map, rest):
-    if str(p) is "q":
+    if str(p) == "q":
         res = res.substitute_variables({"p": Formula.parse(str(p) + "1")})  # left
         res = res.substitute_variables(
             {"q": Formula.parse_prefix(rest)[0].substitute_operators(substitution_map)})  # right
@@ -133,9 +144,17 @@ class Formula:
         second (`~typing.Optional`\\[`Formula`]): the second operand to the
             root, if the root is a binary operator.
     """
+    id : int
     root: str
     first: Optional[Formula]
     second: Optional[Formula]
+
+    count = 0
+
+    @classmethod
+    def incr(self):
+        self.count += 1
+        return self.count
 
     def __init__(self, root: str, first: Optional[Formula] = None,
                  second: Optional[Formula] = None) -> None:
@@ -147,6 +166,7 @@ class Formula:
             second: the second operand to the root, if the root is a binary
                 operator.
         """
+        self.id = self.incr()
         if is_variable(root) or is_constant(root):
             assert first is None and second is None
             self.root = root
@@ -208,6 +228,22 @@ class Formula:
         if hasattr(self, "second"):
             vars = vars.union(self.second.variables())
         return vars
+
+    def variables_list(self) -> Set[str]:
+        """Finds all atomic propositions (variables) in the current formula.
+        Returns:
+            A set of all atomic propositions used in the current formula.
+        """
+        # Task 1.2
+        vars = list()
+        if is_variable(self.root):
+            vars.append(self.root)
+        if hasattr(self, "first"):
+            vars.append(self.first.variables())
+        if hasattr(self, "second"):
+           vars.append(self.second.variables())
+        single_list = reduce(lambda x, y: list(x) + list(y), vars)
+        return single_list
 
     def operators(self) -> Set[str]:
         """Finds all operators in the current formula.
@@ -366,7 +402,7 @@ class Formula:
             assert substitution_map[operator].variables().issubset({'p', 'q'})
         # Task 3.4
         old = str(self)
-        if old[0] is "~":
+        if old[0] == "~":
             if "~" in substitution_map:
                 ret = Formula.parse(old[1:]).substitute_operators(substitution_map)
                 return substitution_map["~"].substitute_variables({"p": ret})
