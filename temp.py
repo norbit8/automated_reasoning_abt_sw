@@ -135,8 +135,15 @@ def list_to_true_cnf(l):
         first = l[0]
         return Formula("&",first,second)
 
+
 def tseitinis_model(model, special_dic):
     pass
+
+
+def compare_formulas(input_formula, tseitin_formula):
+    # generate models
+    Formula.variables(input_formula)
+
 
 ##Tseitini
 phi = Formula.parse("~((p&q)|~(q|r))")
