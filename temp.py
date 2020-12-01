@@ -1,6 +1,7 @@
 from Formula import Formula, is_base_formula, is_unary, is_variable
-from semantics import evaluate
 from tempo import *
+from semantics import *
+
 def createDic(f,d,counter):
     phi_G = Formula("x" + str(counter))
     counter+=1
@@ -25,6 +26,7 @@ def createLis(f,d, lis):
         lis.append(f_temp)
         createLis(f.first,d, lis)
     else:
+        print(f)
         temp = Formula(f.root, d[f.first.id], d[f.second.id])
         f_temp = Formula("<->", d[f.id] ,temp)
         lis.append(f_temp)
@@ -39,7 +41,7 @@ def get_Tseitinis_list(phi):
     createDic(phi, d, counter)
     lis.append(d[phi.id])
     createLis(phi, d, lis)
-    return lis,d
+    return lis
 
 def get_literal_from_cnf(f):
     literals = []
@@ -146,15 +148,30 @@ def tseitinis_model(f,model, special_dic):
         tseitinis_model(f.second, model, special_dic)
         model[special_dic[f.id].root] = evaluate(f, model)
 
+def compare_formulas(input_formula, ts_formula):
+    """
+    This method gets two formulas, one in regular form and the other one is the first one ts form
+    and return True if the second formula is really the ts form of the first one.
+    :param input_formula: Formula
+    :param ts_formula: Formula that should be the ts form of the first input formula
+    :return: True if ts_formula is the ts form of the input_formula
+    """
+    f_input_vars = Formula.variables(input_formula)
+    models_original_formula = all_models(list(f_input_vars))
+    for model in models_original_formula:
+        ts_model = tseitinis_model(model, None, None)  # TODO: is that the signature of the function?
+        result_original_formula = evaluate(input_formula, model)
+        result_ts_formula = evaluate(ts_formula, ts_model)
+        if result_original_formula != result_ts_formula:
+            return False
+    return True
 ##Tseitini
 phi = Formula.parse("~((p&q)|~(q|r))")
-model = {"p":True, "q":True, "r":True}
-Tseitinis_list, special_dict = get_Tseitinis_list(phi)
-tseitinis_model(phi,model, special_dict)
-print(model)
-# Tseitinis_list = convert_to_cnf(Tseitinis_list)
-# print(Tseitinis_list)
-# f1 = list_to_true_cnf(Tseitinis_list)
+Tseitinis_list = get_Tseitinis_list(phi)
+print(Tseitinis_list)
+Tseitinis_list = convert_to_cnf(Tseitinis_list)
+print(Tseitinis_list)
+f1 = list_to_true_cnf(Tseitinis_list)
 
 
 #removal
