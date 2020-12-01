@@ -1,5 +1,5 @@
 from Formula import Formula, is_base_formula, is_unary, is_variable
-
+from tempo import *
 def createDic(f,d,counter):
     phi_G = Formula("x" + str(counter))
     counter+=1
@@ -126,9 +126,26 @@ def BCP(cnf,d):
             bcp_flag = False
 
     return True
-# #Tseitini
-# phi = Formula.parse("((p&q)|~(q|r))")
-# Tseitinis_list = get_Tseitinis_list(phi)
+
+def list_to_true_cnf(l):
+    if len(l)==1:
+        return l[0]
+    else:
+        second = list_to_true_cnf(l[1:])
+        first = l[0]
+        return Formula("&",first,second)
+
+def tseitinis_model(model, special_dic):
+    pass
+
+##Tseitini
+phi = Formula.parse("~((p&q)|~(q|r))")
+Tseitinis_list = get_Tseitinis_list(phi)
+print(Tseitinis_list)
+Tseitinis_list = convert_to_cnf(Tseitinis_list)
+print(Tseitinis_list)
+f1 = list_to_true_cnf(Tseitinis_list)
+
 
 #removal
 # f = Formula.parse("(w1|(r|(q|(r|(w1|~w2)))))")
@@ -137,10 +154,10 @@ def BCP(cnf,d):
 # print(is_clause_tautlogy(f))
 # print(f)
 
-cnf = [["~r","~w","q11"],["r","p","~w"],["p","q","w"],["w23","w34"]]
-d = dict()
-d["p"]= False
-d["q"] = False
-
-print(BCP(cnf,d))
-print(d)
+# cnf = [["~r","~w","q11"],["r","p","~w"],["p","q","w"],["w23","w34"]]
+# d = dict()
+# d["p"]= False
+# d["q"] = False
+#
+# print(BCP(cnf,d))
+# print(d)
