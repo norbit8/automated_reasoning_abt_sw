@@ -167,7 +167,7 @@ def compare_formulas(input_formula, ts_formula, special_dict):
     return True
 
 ##Tseitini
-phi = Formula.parse("((~((p|q)|~(q->r))&~q)<->~r13)")
+phi = Formula.parse("(((~((p&q)|~(q&r))&~q)&~r13)&r31)")
 Tseitinis_list, special_dict = get_Tseitinis_list(phi)
 print(Tseitinis_list)
 f1 = convert_to_cnf(Tseitinis_list)
