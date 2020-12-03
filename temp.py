@@ -1,6 +1,7 @@
 from Formula import Formula, is_base_formula, is_unary, is_variable
 from tempo import *
 from semantics import *
+from Solver import Claus
 
 def createDic(f,d,counter):
     phi_G = Formula("x" + str(counter))
@@ -169,10 +170,14 @@ def compare_formulas(input_formula, ts_formula, special_dict):
 ##Tseitini
 phi = Formula.parse("(((~((p&q)|~(q&r))&~q)&~r13)&r31)")
 Tseitinis_list, special_dict = get_Tseitinis_list(phi)
-print(Tseitinis_list)
+# print(Tseitinis_list)
+
 f1 = convert_to_cnf(Tseitinis_list)
+c = [Claus(f) for f in f1]
 print(f1)
-f1 = list_to_true_cnf(f1)
+print(c)
+# print(f1)
+# f1 = list_to_true_cnf(f1)
 
 # model = {"p":True, "q":True, "r":True}
 # Tseitinis_list, special_dict = get_Tseitinis_list(phi)
@@ -182,7 +187,7 @@ f1 = list_to_true_cnf(f1)
 
 # true_cnf = list_to_true_cnf(convert_to_cnf(Tseitinis_list))
 # print(true_cnf)
-print(compare_formulas(phi, f1, special_dict))
+# print(compare_formulas(phi, f1, special_dict))
 
 #removal
 # f = Formula.parse("(w1|(r|(q|(r|(w1|~w2)))))")
