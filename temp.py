@@ -1,7 +1,8 @@
 from Formula import Formula, is_base_formula, is_unary, is_variable
 from tempo import *
 from semantics import *
-from Solver import Claus
+from Solver import Claus, creates_watch_literals
+from Bcp import Bcp
 
 def createDic(f,d,counter):
     phi_G = Formula("x" + str(counter))
@@ -168,14 +169,14 @@ def compare_formulas(input_formula, ts_formula, special_dict):
     return True
 
 ##Tseitini
-phi = Formula.parse("(((~((p&q)|~(q&r))&~q)&~r13)&r31)")
-Tseitinis_list, special_dict = get_Tseitinis_list(phi)
+# phi = Formula.parse("(((~((p&q)|~(q&r))&~q)&~r13)&r31)")
+# Tseitinis_list, special_dict = get_Tseitinis_list(phi)
 # print(Tseitinis_list)
 
-f1 = convert_to_cnf(Tseitinis_list)
-c = [Claus(f) for f in f1]
-print(f1)
-print(c)
+# f1 = convert_to_cnf(Tseitinis_list)
+# c = [Claus(f) for f in f1]
+# print(f1)
+# print(c)
 # print(f1)
 # f1 = list_to_true_cnf(f1)
 
@@ -203,3 +204,36 @@ print(c)
 #
 # print(BCP(cnf,d))
 # print(d)
+
+# c1 = Formula.parse("(~x1|(~x4|x5))") # x4, x5
+# c2 = Formula.parse("(~x4|x6)") #x4, x6
+# c3 = Formula.parse("(~x5|(~x6|x7))") #x7, x5
+# c4 = Formula.parse("(~x7|x8)") #x8 x7
+# c5 = Formula.parse("(~x2|(~x7|x9))") #x7, x2
+# c6 = Formula.parse("(~x8|~x9)") #x8,x9
+# c7 = Formula.parse("(~x8|x9)") #x8,x9
+# c8 = Formula.parse("x10") #x8,x9
+# l = [c1,c2,c3,c4,c5,c6,c7,c8]
+
+c1 = Formula.parse("(~x1|x4)") # x4, x5
+c2 = Formula.parse("(~x4|x6)") #x4, x6
+c3 =  Formula.parse("(~x1|x5)") # x4, x5
+
+
+l = [c1,c2,c3]
+f = [Claus(f) for f in l]
+
+# c_temp = f[2]
+# c_temp.watch_literals = ['x5', 'x7']
+# print(c_temp.possible_watch_literals)
+# print(c_temp.get_new_watch_literal('x5'))
+# print(c_temp.possible_watch_literals)
+# print(c_temp.watch_literals)
+
+satisfiable, watch_literal_map, assignment_map = creates_watch_literals(f)
+print("before",watch_literal_map)
+bcp = Bcp(watch_literal_map)
+bcp.one_bcp_step(('x1',True))
+print("after", watch_literal_map)
+# bcp.one_bcp_step(('x2',True))
+# bcp.one_bcp_step(('x3',True))
