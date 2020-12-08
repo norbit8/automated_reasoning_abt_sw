@@ -19,12 +19,13 @@ def add_watch_literals_for_clause(claus, watch_literal_map):
             watch_literal_map[lit] = []
         watch_literal_map[lit].append(claus)
 
+
 def get_initial_assignment(f):
     satisfiable, assignment_map = check_initial_assignment(f)
     if not satisfiable:
-        return (False,False)
+        return (False, False)
     else:
-        return (satisfiable, [(k,v) for k,v in assignment_map.items()])
+        return (satisfiable, [(k, v) for k, v in assignment_map.items()])
 
 
 def creates_watch_literals(f):
@@ -38,6 +39,7 @@ def creates_watch_literals(f):
         if claus.number_of_literals > 1:
             add_watch_literals_for_clause(claus, watch_literal_map)
     return watch_literal_map
+
 
 def check_initial_assignment(f):
     """
@@ -64,18 +66,16 @@ def main(input_formula):
     # input_formula = "(~x1|(~x4|(x4|x5)))"
     # f = Parser.parse(input_formula)
 
-
     c1 = Formula.parse("(~x1|(~x4|x5))")
     c2 = Formula.parse("(~x4|x6)")
-    c3 =  Formula.parse("(~x5|(~x6|x7))")
+    c3 = Formula.parse("(~x5|(~x6|x7))")
     c4 = Formula.parse("(~x7|x8)")
-    c5 =  Formula.parse("(~x2|(~x7|x9))")
-    c6 =Formula.parse("(~x8|~x9)")
+    c5 = Formula.parse("(~x2|(~x7|x9))")
+    c6 = Formula.parse("(~x8|~x9)")
     c7 = Formula.parse("(~x8|x9)")
 
-    l = [c1, c2, c3 ,c4 ,c5 ,c6 ,c7]
+    l = [c1, c2, c3, c4, c5, c6, c7]
     f = [Parser.Claus(f) for f in l]
-
 
     satsfible, assignmet_map = get_initial_assignment(f)
     if not satsfible:
@@ -83,11 +83,11 @@ def main(input_formula):
         return False
 
     watch_literal_map = creates_watch_literals(f)
-    assignmet_map = [("x1",True),("x2",True),("x3",True),("x4",True) ]
+    assignmet_map = [("x1", True), ("x2", True), ("x3", True), ("x4", True)]
     bcp = Bcp(watch_literal_map)
-    if (bcp.bcp_step(assignmet_map))[0] == 0:  #(msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
+    if (bcp.bcp_step(assignmet_map))[
+        0] == 0:  # (msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
         print("UNSAT!")
-
 
     # print("before",watch_literal_map)
     # bcp = Bcp(watch_literal_map)
@@ -98,8 +98,5 @@ def main(input_formula):
     # b
 
 
-
-
-
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main('sys.argv[1]')

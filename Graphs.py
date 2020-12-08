@@ -1,4 +1,4 @@
-from __future__ import  annotations
+from __future__ import annotations
 import networkx as nx
 from Parser import Literal
 from Formula import Formula
@@ -151,6 +151,7 @@ def conflict_analysis(g, current_decision_node, conflict_node):
     return create_clause(current_clause)
 
 
+
 # DG = nx.DiGraph()
 # DG.add_nodes_from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 # DG.add_edges_from([(7, 5), (7, 6), (8, 6), (6, 4), (5, 4), (4, 3), (4, 'c'), (3, 'c'), (2, 'c'), (1, 2)])
@@ -183,6 +184,7 @@ x7 = Literal('x7', 5, False)
 c = Literal('c', 5, True)
 graph2.add_nodes_from([x2, x4, x5, x6, x7, x9, c])
 graph2.add_edges_from([(x2, x5), (x4, x5), (x4, x6), (x9, x6), (x5, x7), (x6, x7), (x6, c), (x7, c)])
+# print(type(get_node_from_graph(graph2, 'x2')))
 print(conflict_analysis(graph2, x4, c))
 # ------------------------------------------------
 

@@ -17,7 +17,8 @@ class Bcp:
         # self.status.append((self.current_graph, self.current_watch_literals_map, self.current_assignment)) # i-th status = i-th graph, i-th watch literal
         #
         #                                                                                      # status, i-th assignment map
-    def remove_watch_literal(self,variable, claus):
+
+    def remove_watch_literal(self, variable, claus):
         if variable in self.current_watch_literals_map.keys():
             if len(self.current_watch_literals_map[variable]) == 1:
                 del self.current_watch_literals_map[variable]
@@ -135,6 +136,21 @@ class Bcp:
             self.current_decision_level+=1
         self.current_graph.add_nodes_from(nodes)
 
+    def get_node_from_graph(self, node_name: str):
+        for node in self.current_graph.nodes:
+            if node.variable_name == node_name:
+                return node
+
+    def update_graph(self, father, sons):
+        print("IM THE FATHER", father)
+        print("WE ARE THE SONS", sons)
+        nodes = []
+        for variable, assign in sons:
+            nodes.append(Literal(variable, self.current_decision_level, assign))
+        self.current_graph.add_nodes_from(nodes)
+        self.current_graph.add_edges_from([(father, son) for son in nodes])
+        self.current_decision_level += 1
+
     def bcp_step(self, new_assignment: List[Tuple[str, bool]]):
         self.update_current_assignment(new_assignment)
 
@@ -145,12 +161,14 @@ class Bcp:
             add_to_stack = self.one_bcp_step(var)
             # print(var, assign, add_to_stack, self.current_assignment)
             stack += add_to_stack
+            self.update_graph(self.get_node_from_graph(var), add_to_stack)
             if not (self.update_current_assignment(add_to_stack)):
                 return (0,False)
         # print("final", self.current_watch_literals_map, self.current_assignment)
         return (1,self.current_assignment)
 
     def show_graph(self):
+        print(self.current_graph.edges)
         plt.subplot(121)
         nx.draw(self.current_graph, with_labels=True, font_weight='bold')
         plt.show()
