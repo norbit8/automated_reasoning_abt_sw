@@ -1,7 +1,7 @@
 from Formula import Formula, is_base_formula, is_unary, is_variable
 from tempo import *
 from semantics import *
-from Solver import Claus, creates_watch_literals
+from Solver import Claus, creates_watch_literals, get_initial_assignment
 from Bcp import Bcp
 
 def createDic(f,d,counter):
@@ -230,10 +230,13 @@ f = [Claus(f) for f in l]
 # print(c_temp.possible_watch_literals)
 # print(c_temp.watch_literals)
 
-satisfiable, watch_literal_map, assignment_map = creates_watch_literals(f)
-print("before",watch_literal_map)
-bcp = Bcp(watch_literal_map)
-bcp.one_bcp_step(('x1',True))
-print("after", watch_literal_map)
+satisfiable, assignment_map = get_initial_assignment(f)
+watch_literal_map = creates_watch_literals(f)
+print(satisfiable, assignment_map, watch_literal_map)
+exit()
+# print("before",watch_literal_map)
+# bcp = Bcp(watch_literal_map)
+# bcp.one_bcp_step(('x1',True))
+# print("after", watch_literal_map)
 # bcp.one_bcp_step(('x2',True))
 # bcp.one_bcp_step(('x3',True))

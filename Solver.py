@@ -104,20 +104,25 @@ def add_watch_literals_for_clause(claus, watch_literal_map):
             watch_literal_map[lit] = []
         watch_literal_map[lit].append(claus)
 
+def get_initial_assignment(f):
+    satisfiable, assignment_map = check_initial_assignment(f)
+    if not satisfiable:
+        return (False,False)
+    else:
+        return (satisfiable, assignment_map)
+
+
 def creates_watch_literals(f):
     """
 
     :param f:
     :return:
     """
-    satisfiable, assignment_map = check_initial_assignment(f)
-    if not satisfiable:
-        return False, None, None
     watch_literal_map = dict()
     for claus in f:
         if claus.number_of_literals > 1:
             add_watch_literals_for_clause(claus, watch_literal_map)
-    return satisfiable, watch_literal_map, assignment_map
+    return watch_literal_map
 
 def check_initial_assignment(f):
     """
