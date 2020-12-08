@@ -1,7 +1,7 @@
 import networkx as nx
 from typing import *
 from Parser import Literal
-
+from Graphs import conflict_analysis
 
 import matplotlib.pyplot as plt
 
@@ -46,11 +46,13 @@ class Bcp:
         if sink in self.current_assignment.keys():
             if self.current_assignment[sink] != sink_assignment:
                 c = Literal('c', self.current_decision_level, False)
-                edges = [(s,c) for s in source]
-                edges.append((sink,c))
+                edges = [(self.get_node_from_graph(s),c) for s in source]
+                edges.append((self.get_node_from_graph(sink),c))
                 self.current_graph.add_edges_from(edges)
                 return
-        edges = [(s, sink) for s in source]
+        node = Literal(sink, self.current_decision_level, sink_assignment)
+        self.current_graph.add_node(node)
+        edges = [(self.get_node_from_graph(s), self.get_node_from_graph(sink)) for s in source]
         self.current_graph.add_edges_from(edges)
         return
 
@@ -108,7 +110,7 @@ class Bcp:
     def one_bcp_step(self, variable):
 
         #increment decision level
-        self.current_decision_level += 1
+
 
 
         #add node to graph
@@ -132,8 +134,9 @@ class Bcp:
     def intialize_graph(self,new_assignment):
         nodes = []
         for variable,assign in new_assignment:
+            # print(variable, self.current_decision_level)
             nodes.append(Literal(variable, self.current_decision_level, assign))
-            self.current_decision_level+=1
+            self.current_decision_level += 1
         self.current_graph.add_nodes_from(nodes)
 
     def get_node_from_graph(self, node_name: str):
@@ -141,34 +144,41 @@ class Bcp:
             if node.variable_name == node_name:
                 return node
 
-    def update_graph(self, father, sons):
-        print("IM THE FATHER", father)
-        print("WE ARE THE SONS", sons)
-        nodes = []
-        for variable, assign in sons:
-            nodes.append(Literal(variable, self.current_decision_level, assign))
-        self.current_graph.add_nodes_from(nodes)
-        self.current_graph.add_edges_from([(father, son) for son in nodes])
-        self.current_decision_level += 1
+    # def update_graph(self, father, sons):
+    #     print("IM THE FATHER", father)
+    #     print("WE ARE THE SONS", sons)
+    #     nodes = []
+    #     for variable, assign in sons:
+    #         nodes.append(Literal(variable, self.current_decision_level, assign))
+    #     self.current_graph.add_nodes_from(nodes)
+    #     self.current_graph.add_edges_from([(father, son) for son in nodes])
+    #     self.current_decision_level += 1
 
     def bcp_step(self, new_assignment: List[Tuple[str, bool]]):
         self.update_current_assignment(new_assignment)
 
         stack = [(variable, assign) for variable,assign in new_assignment]
         self.intialize_graph(new_assignment)
+        decision = new_assignment[-1]
         while stack:
             var, assign  = stack.pop()
             add_to_stack = self.one_bcp_step(var)
             # print(var, assign, add_to_stack, self.current_assignment)
             stack += add_to_stack
-            self.update_graph(self.get_node_from_graph(var), add_to_stack)
+            # self.show_graph()
             if not (self.update_current_assignment(add_to_stack)):
+                self.get_node_from_graph("x2").decision_level = 0
+                c = conflict_analysis(self.current_graph, self.get_node_from_graph("x4"), self.get_node_from_graph("c"))
+                print(c)
+                self.show_graph()
                 return (0,False)
-        # print("final", self.current_watch_literals_map, self.current_assignment)
+
         return (1,self.current_assignment)
 
     def show_graph(self):
-        print(self.current_graph.edges)
+        # print(self.current_graph.edges)
+        for node in self.current_graph.nodes:
+            print(node.variable_name, node.decision_level)
         plt.subplot(121)
         nx.draw(self.current_graph, with_labels=True, font_weight='bold')
         plt.show()
