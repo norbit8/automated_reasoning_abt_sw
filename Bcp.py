@@ -76,6 +76,7 @@ class Bcp:
         for var, assign in new_assignment:
             if var in self.current_assignment.keys():
                 if self.current_assignment[var] != assign:
+
                     return False
             self.current_assignment[var] = assign
 
@@ -90,8 +91,8 @@ class Bcp:
             add_to_stack = self.one_bcp_step(var)
             print("current assignment" , self.current_assignment)
             stack += add_to_stack
-            if (self.update_current_assignment(add_to_stack)):
-                return (False,False)
+            if not (self.update_current_assignment(add_to_stack)):
+                return (0,False)
 
         return self.current_assignment
 

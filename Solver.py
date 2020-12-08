@@ -80,7 +80,8 @@ def main(input_formula):
 
     watch_literal_map = creates_watch_literals(f)
     bcp = Bcp(watch_literal_map)
-    bcp.bcp_step(assignmet_map)
+    if (bcp.bcp_step(assignmet_map))[0] == 0:  #(msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
+        print("UNSAT!")
 
 
     # print("before",watch_literal_map)
