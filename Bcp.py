@@ -1,8 +1,6 @@
 import networkx as nx
 from typing import *
 from Parser import Literal
-
-
 import matplotlib.pyplot as plt
 
 
@@ -17,7 +15,8 @@ class Bcp:
         # self.status.append((self.current_graph, self.current_watch_literals_map, self.current_assignment)) # i-th status = i-th graph, i-th watch literal
         #
         #                                                                                      # status, i-th assignment map
-    def remove_watch_literal(self,variable, claus):
+
+    def remove_watch_literal(self, variable, claus):
         if variable in self.current_watch_literals_map.keys():
             if len(self.current_watch_literals_map[variable]) == 1:
                 del self.current_watch_literals_map[variable]
@@ -28,14 +27,12 @@ class Bcp:
         self.remove_watch_literal(variable, claus)
         # print(new_watch_literal, "was here", self.current_watch_literals_map.keys())
         if new_watch_literal not in self.current_watch_literals_map.keys():
-
             self.current_watch_literals_map[new_watch_literal] = []
         self.current_watch_literals_map[new_watch_literal].append(claus)
 
-
-    def check_for_one_bcp_assigment(self,variable):
+    def check_for_one_bcp_assigment(self, variable):
         new_assigments = []
-        #no bcp possible
+        # no bcp possible
         if variable not in self.current_watch_literals_map:
             return []
         stack = self.current_watch_literals_map[variable].copy()
@@ -53,7 +50,7 @@ class Bcp:
                         # get the new bcp assignment
                         new_assigment_variable, value = claus.get_bcp_assignment(variable)
                         new_assigments.append((new_assigment_variable, value))
-
+                        print("clauss:", claus, "var:", variable, "lit:", claus.watch_literals)
                         # claus.watch_literals = []
 
                     vars = claus.watch_literals
@@ -84,21 +81,20 @@ class Bcp:
 
     def one_bcp_step(self, variable):
 
-        #increment decision level
+        # increment decision level
         self.current_decision_level += 1
 
-
-        #add node to graph
+        # add node to graph
         # node = Literal(variable, self.current_decision_level, self.current_assignment[variable])
         # self.current_graph.add_node(node)
 
-        #check for bcp step
+        # check for bcp step
         new_assigments = self.check_for_one_bcp_assigment(variable)
         return new_assigments
 
         # self.show_graph()
 
-    def update_current_assignment(self,new_assignment):
+    def update_current_assignment(self, new_assignment):
         for var, assign in new_assignment:
             if var in self.current_assignment.keys():
                 if self.current_assignment[var] != assign:
@@ -106,31 +102,49 @@ class Bcp:
             self.current_assignment[var] = assign
         return True
 
-    def intialize_graph(self,new_assignment):
+    def intialize_graph(self, new_assignment):
         nodes = []
-        for variable,assign in new_assignment:
+        for variable, assign in new_assignment:
             nodes.append(Literal(variable, self.current_decision_level, assign))
-            self.current_decision_level+=1
+            self.current_decision_level += 1
         self.current_graph.add_nodes_from(nodes)
+
+    def get_node_from_graph(self, node_name: str):
+        for node in self.current_graph.nodes:
+            if node.variable_name == node_name:
+                return node
+
+    def update_graph(self, father, sons):
+        print("IM THE FATHER", father)
+        print("WE ARE THE SONS", sons)
+        nodes = []
+        for variable, assign in sons:
+            nodes.append(Literal(variable, self.current_decision_level, assign))
+        self.current_graph.add_nodes_from(nodes)
+        self.current_graph.add_edges_from([(father, son) for son in nodes])
+        self.current_decision_level += 1
 
     def bcp_step(self, new_assignment: List[Tuple[str, bool]]):
         self.update_current_assignment(new_assignment)
 
-        stack = [(variable, assign) for variable,assign in new_assignment]
+        stack = [(variable, assign) for variable, assign in new_assignment]
         self.intialize_graph(new_assignment)
         while stack:
-            var, assign  = stack.pop()
+            var, assign = stack.pop()
             add_to_stack = self.one_bcp_step(var)
             # print(var, assign, add_to_stack, self.current_assignment)
             stack += add_to_stack
+            self.update_graph(self.get_node_from_graph(var), add_to_stack)
             if not (self.update_current_assignment(add_to_stack)):
-                return (0,False)
+
+                self.show_graph()
+                return (0, False)
+            print(add_to_stack)
         # print("final", self.current_watch_literals_map, self.current_assignment)
-        return (1,self.current_assignment)
+        return (1, self.current_assignment)
 
     def show_graph(self):
+        print(self.current_graph.edges)
         plt.subplot(121)
         nx.draw(self.current_graph, with_labels=True, font_weight='bold')
         plt.show()
-
-
