@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import *
 from Formula import Formula, is_binary, is_unary
 from semantics import evaluate
@@ -87,6 +88,12 @@ class Literal:
         self.variable_name = variable_name
         self.decision_level = decision_level
         self.assignment = assignment
+
+    def __eq__(self, other: Literal):
+        return self.variable_name == other.variable_name
+
+    def __hash__(self):
+        return self.variable_name.__hash__()
 
     def __repr__(self):
         return self.variable_name

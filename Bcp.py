@@ -56,7 +56,7 @@ class Bcp:
                     # print("after", self.current_watch_literals_map)
         return new_assigments
 
-    def one_bcp_step(self, new_assignment:Tuple[str,bool]):
+    def one_bcp_step(self, new_assignment: Tuple[str, bool]):
         variable, assign = new_assignment
         #increment decision level
         self.current_decision_level += 1
@@ -67,8 +67,7 @@ class Bcp:
         self.current_graph.add_node(node)
         #check for bcp step
         new_assigments = self.check_for_one_bcp_assigment(variable)
-        print("final" ,new_assigments)
-
+        print("final", new_assigments)
         # self.show_graph()
 
 
