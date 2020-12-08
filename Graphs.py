@@ -1,5 +1,4 @@
 from __future__ import annotations
-import networkx as nx
 from Parser import Literal
 from Formula import Formula
 from typing import List
@@ -139,8 +138,10 @@ def conflict_analysis(g, current_decision_node, conflict_node):
     :param conflict_node: The conflict node.
     :return: The conflict clause.
     """
+
     first_uip = find_uip(g, current_decision_node)
     current_clause = get_clause(g, conflict_node, True)
+
     while check_if_should_stop(current_clause, first_uip):
         # print("Conflict clause: ", create_clause(current_clause))
         lal = last_assigned_literal(g, current_clause, first_uip)

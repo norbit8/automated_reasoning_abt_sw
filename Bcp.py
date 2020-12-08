@@ -159,15 +159,16 @@ class Bcp:
 
         stack = [(variable, assign) for variable,assign in new_assignment]
         self.intialize_graph(new_assignment)
+
         decision = new_assignment[-1]
         while stack:
             var, assign  = stack.pop()
             add_to_stack = self.one_bcp_step(var)
+
             # print(var, assign, add_to_stack, self.current_assignment)
             stack += add_to_stack
             # self.show_graph()
             if not (self.update_current_assignment(add_to_stack)):
-                self.get_node_from_graph("x2").decision_level = 0
                 c = conflict_analysis(self.current_graph, self.get_node_from_graph("x4"), self.get_node_from_graph("c"))
                 print(c)
                 self.show_graph()
