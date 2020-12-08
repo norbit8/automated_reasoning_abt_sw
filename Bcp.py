@@ -18,14 +18,17 @@ class Bcp:
         #
         #                                                                                      # status, i-th assignment map
     def remove_watch_literal(self,variable, claus):
-        if len(self.current_watch_literals_map[variable]) == 1:
-            del self.current_watch_literals_map[variable]
-        else:
-            self.current_watch_literals_map[variable].remove(claus)
+        if variable in self.current_watch_literals_map.keys():
+            if len(self.current_watch_literals_map[variable]) == 1:
+                del self.current_watch_literals_map[variable]
+            else:
+                self.current_watch_literals_map[variable].remove(claus)
 
     def update_watch_literal_map(self, new_watch_literal, claus, variable):
         self.remove_watch_literal(variable, claus)
+        print(new_watch_literal, "was here", self.current_watch_literals_map.keys())
         if new_watch_literal not in self.current_watch_literals_map.keys():
+
             self.current_watch_literals_map[new_watch_literal] = []
         self.current_watch_literals_map[new_watch_literal].append(claus)
 
@@ -37,22 +40,46 @@ class Bcp:
             return []
         stack = self.current_watch_literals_map[variable].copy()
         for claus in stack:
+            claus.update_possible_literals(self.current_assignment.copy())
             # check for wasfull claus
+            # print(variable, "claus", claus, "assignment", self.current_assignment, "watch", self.current_watch_literals_map)
             if not claus.is_satsfied:
+
                 if claus.is_bcp_potential(variable):
+                    # print("potential")
+                    print("pontential")
+                    print("Before: var:", variable, "claus:", claus, self.current_assignment, self.current_watch_literals_map)
                     if claus.all_false(self.current_assignment.copy(), variable):
                         # get the new bcp assignment
                         new_assigment_variable, value = claus.get_bcp_assignment(variable)
                         new_assigments.append((new_assigment_variable, value))
-                        # no more watch litrals for this claus
-                        claus.watch_literals = []
-                    self.remove_watch_literal(variable, claus)
+
+                        # claus.watch_literals = []
+
+                    vars = claus.watch_literals
+                    for var in vars:
+                        self.remove_watch_literal(var, claus)
+
+                    # no more watch litrals for this claus / clause is done!
                     claus.is_satsfied = True
+                    claus.watch_literals = []
+                    claus.possible_watch_literals = []
+                    print("After: var:", variable, "claus:", claus, self.current_assignment,
+                          self.current_watch_literals_map)
                 else:
+                    print("no potential")
+                    print("Before: var:", variable, "claus:", claus, self.current_assignment,
+                          self.current_watch_literals_map)
                     # print(variable, claus)
                     new_watch_literal = claus.get_new_watch_literal(variable)
-                    self.update_watch_literal_map(new_watch_literal, claus, variable)
+                    print("new_watch:" ,new_watch_literal)
+                    if new_watch_literal != []:
+                        self.update_watch_literal_map(new_watch_literal, claus, variable)
+                    else:
+                        self.remove_watch_literal(variable, claus)
                     # print("after", self.current_watch_literals_map)
+                    print("After: var:", variable, "claus:", claus, self.current_assignment,
+                          self.current_watch_literals_map)
         return new_assigments
 
     def one_bcp_step(self, variable):
@@ -78,10 +105,10 @@ class Bcp:
                     return False
             self.current_assignment[var] = assign
         return True
+
     def bcp_step(self, new_assignment: List[Tuple[str, bool]]):
         self.update_current_assignment(new_assignment)
         stack = [(variable, assign) for variable,assign in new_assignment]
-
         while stack:
             var, assign  = stack.pop()
             add_to_stack = self.one_bcp_step(var)
@@ -89,8 +116,7 @@ class Bcp:
             stack += add_to_stack
             if not (self.update_current_assignment(add_to_stack)):
                 return (0,False)
-        print(self.current_watch_literals_map)
-        print(self.current_assignment)
+        print("final", self.current_watch_literals_map, self.current_assignment)
         return (1,self.current_assignment)
 
     def show_graph(self):

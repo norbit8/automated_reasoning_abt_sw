@@ -182,7 +182,12 @@ def parse(str):
     #Tseitini
     phi = Formula.parse(str)
     Tseitinis_list, special_dict = get_Tseitinis_list(phi)
-    return [Claus(f) for f in  convert_to_cnf(Tseitinis_list)]
+    f = [remove_literal_occurs_twice(f) for f in  convert_to_cnf(Tseitinis_list)]
+    f = [c for c in f if not is_clause_tautlogy(c)]
+    cnf = [Claus(f) for f in  convert_to_cnf(Tseitinis_list)]
+    return cnf
+
+
 
 
 class Claus:
@@ -219,12 +224,17 @@ class Claus:
         return variable in self.variables
 
     def get_one_watch_literal(self):
-        return self.possible_watch_literals.pop(0)
+        if self.possible_watch_literals:
+            return self.possible_watch_literals.pop(0)
+        return []
 
     def get_two_watch_literals(self):
         return self.possible_watch_literals[:2]
 
     def is_bcp_potential(self, variable):
+        print("claus:", self.formula)
+        print(self.possible_watch_literals)
+        print(self.watch_literals)
         return len(self.possible_watch_literals) == 0 and len(list(set(self.watch_literals) - {variable})) == 1
 
     def get_new_watch_literal(self, variable):
@@ -240,6 +250,9 @@ class Claus:
         #error
         print("problem1")
         exit(1)
+
+    def update_possible_literals(self, model):
+        self.possible_watch_literals = [var for var in self.possible_watch_literals if var not in model.keys()]
 
     def all_false(self,model, variable):
         last_unassinged_literal = (set(self.watch_literals) - {variable}).pop()

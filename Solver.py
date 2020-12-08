@@ -60,18 +60,22 @@ def check_initial_assignment(f):
 
 
 def main(input_formula):
-    # #cretes Tsieni
-    # input_formula = "((q->p)&r)"
+    ##cretes Tsieni
+    # input_formula = "(~x1|(~x4|(x4|x5)))"
     # f = Parser.parse(input_formula)
 
-    c1 = Formula.parse("(~x1|(~x4|x7))") # x4 , x1
-    c2 = Formula.parse("(x4|x6)") # x4 , x6
-    c3 =  Formula.parse("(~x1|~x6)") # x1, x5
-    # c4 = Formula.parse("x6")
-    c5 = Formula.parse("x1")
 
-    l = [c1,c2,c3,c5]
+    c1 = Formula.parse("(~x1|(~x4|x5))")
+    c2 = Formula.parse("(~x4|x6)")
+    c3 =  Formula.parse("(~x5|(~x6|x7))")
+    c4 = Formula.parse("(~x7|x8)")
+    c5 =  Formula.parse("(~x2|(~x7|x9))")
+    c6 =Formula.parse("(~x8|~x9)")
+    c7 = Formula.parse("(~x8|x9)")
+
+    l = [c1, c2, c3 ,c4 ,c5 ,c6 ,c7]
     f = [Parser.Claus(f) for f in l]
+
 
     satsfible, assignmet_map = get_initial_assignment(f)
     if not satsfible:
@@ -79,6 +83,7 @@ def main(input_formula):
         return False
 
     watch_literal_map = creates_watch_literals(f)
+    assignmet_map = [("x1",True),("x2",True),("x3",True),("x4",True) ]
     bcp = Bcp(watch_literal_map)
     if (bcp.bcp_step(assignmet_map))[0] == 0:  #(msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
         print("UNSAT!")
