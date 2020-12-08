@@ -1,102 +1,10 @@
-from __future__ import annotations
 from typing import *
 from Formula import Formula, is_binary, is_unary
 from semantics import evaluate
+import sys
+import Parser
+from Bcp import Bcp
 
-
-class Claus:
-
-    def __init__(self, formula:Formula):
-        self.formula = formula
-        self.literals = self.convert_to_literals(formula)
-        self.number_of_literals = len(self.literals)
-        self.variables = list(self.formula.variables())
-        self.possible_watch_literals = self.variables
-        self.watch_literals = []
-        self.is_satsfied = False
-
-    def convert_to_literals(self, f):
-        literals = []
-
-        while (is_binary(f.root)):
-            if (is_unary(f.first.root)):
-                literals.append(f.first.root + f.first.first.root)
-            else:
-                literals.append(f.first.root)
-            f = f.second
-        if (is_unary(f.root)):
-            literals.append(f.root + f.first.root)
-        else:
-            literals.append(f.root)
-        return literals
-
-    def get_last_one(self):
-        if self.number_of_literals == 1:
-            return self.literals[0][0] != "~"
-
-    def conatin_variabe(self, variable:str):
-        return variable in self.variables
-
-    def get_one_watch_literal(self):
-        return self.possible_watch_literals.pop(0)
-
-    def get_two_watch_literals(self):
-        return self.possible_watch_literals[:2]
-
-    def is_bcp_potential(self, variable):
-        return len(self.possible_watch_literals) == 0 and len(list(set(self.watch_literals) - {variable})) == 1
-
-    def get_new_watch_literal(self, variable):
-        self.watch_literals.remove(variable)
-        new_watch_literal = [self.get_one_watch_literal(),]
-        self.watch_literals += new_watch_literal
-        return new_watch_literal[0]
-
-    def get_literal(self, variable):
-        for literal in self.literals:
-            if variable in literal:
-                return literal
-        #error
-        print("problem1")
-        exit(1)
-
-    def all_false(self,model, variable):
-        last_unassinged_literal = (set(self.watch_literals) - {variable}).pop()
-        literal = self.get_literal(last_unassinged_literal)
-        if literal[0] == '~':
-            model[last_unassinged_literal] = True
-        else:
-            model[last_unassinged_literal] = False
-        return not evaluate(self.formula, model)
-
-    def get_bcp_assignment(self, variable):
-        last_unassinged_literal = (set(self.watch_literals) - {variable}).pop()
-        literal = self.get_literal(last_unassinged_literal)
-        if literal[0] == '~':
-            value = False
-        else:
-           value = True
-        return last_unassinged_literal, value
-
-    def __repr__(self):
-        return str(self.literals)
-
-
-class Literal:
-
-    def __init__(self, variable_name:str, decision_level:int, assignment:bool):
-        self.variable_name = variable_name
-        self.decision_level = decision_level
-        self.assignment = assignment
-
-    def __eq__(self, other: Literal):
-        return self.variable_name == other.variable_name
-
-    def __hash__(self):
-        return self.variable_name.__hash__()
-
-    def __repr__(self):
-        return self.variable_name
 
 def get_watch_literals_for_clause(claus):
     claus.watch_literals = claus.get_two_watch_literals()
@@ -150,3 +58,42 @@ def check_initial_assignment(f):
                 assignment_map[var] = assign
     return satisfiable, assignment_map
 
+
+def main(input_formula):
+    # #cretes Tsieni
+    # input_formula = "((q->p)&r)"
+    # f = Parser.parse(input_formula)
+
+    c1 = Formula.parse("(~x1|(~x4|x7))") # x4 , x1
+    c2 = Formula.parse("(x4|~x6)") # x4 , x6
+    c3 =  Formula.parse("(~x1|~x6)") # x1, x5
+    # c4 = Formula.parse("x6")
+    c5 = Formula.parse("x1")
+
+    l = [c1,c2,c3,c5]
+    f = [Parser.Claus(f) for f in l]
+
+    satsfible, assignmet_map = get_initial_assignment(f)
+    if not satsfible:
+        print("UNSAT")
+        return False
+
+    watch_literal_map = creates_watch_literals(f)
+    bcp = Bcp(watch_literal_map)
+    bcp.bcp_step(assignmet_map)
+
+
+    # print("before",watch_literal_map)
+    # bcp = Bcp(watch_literal_map)
+    # print(bcp.one_bcp_step(('x6',True)))
+    # print("after", watch_literal_map)
+    #
+    # bcp.one_bcp_step(('x2',True))
+    # b
+
+
+
+
+
+if __name__ == '__main__':
+    main(sys.argv[1])
