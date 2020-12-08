@@ -34,7 +34,7 @@ class Bcp:
         new_assigments = []
         #no bcp possible
         if variable not in self.current_watch_literals_map:
-            return True
+            return []
         stack = list(self.current_watch_literals_map[variable])
         for claus in stack:
             # check for wasfull claus
@@ -63,11 +63,11 @@ class Bcp:
 
 
         #add node to graph
-        node = Literal(variable, self.current_decision_level, self.current_assignment[variable])
-        self.current_graph.add_node(node)
+        # node = Literal(variable, self.current_decision_level, self.current_assignment[variable])
+        # self.current_graph.add_node(node)
+
         #check for bcp step
         new_assigments = self.check_for_one_bcp_assigment(variable)
-        print("here", new_assigments)
         return new_assigments
 
         # self.show_graph()
@@ -80,15 +80,15 @@ class Bcp:
             self.current_assignment[var] = assign
 
     def bcp_step(self, new_assignment: List[Tuple[str, bool]]):
-
+        print("new assignment", new_assignment)
         self.update_current_assignment(new_assignment)
-
         stack = [(variable, assign) for variable,assign in new_assignment]
+
         while stack:
-            var , assign  = stack.pop()
-            print("pop", var, assign)
+            var, assign  = stack.pop()
+            print("pop variable", var, assign)
             add_to_stack = self.one_bcp_step(var)
-            print(self.current_assignment)
+            print("current assignment" , self.current_assignment)
             stack += add_to_stack
             if (self.update_current_assignment(add_to_stack)):
                 return (False,False)

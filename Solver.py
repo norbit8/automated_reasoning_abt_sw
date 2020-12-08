@@ -24,7 +24,7 @@ def get_initial_assignment(f):
     if not satisfiable:
         return (False,False)
     else:
-        return (satisfiable, assignment_map)
+        return (satisfiable, [(k,v) for k,v in assignment_map.items()])
 
 
 def creates_watch_literals(f):
