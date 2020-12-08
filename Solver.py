@@ -65,7 +65,7 @@ def main(input_formula):
     # f = Parser.parse(input_formula)
 
     c1 = Formula.parse("(~x1|(~x4|x7))") # x4 , x1
-    c2 = Formula.parse("(x4|~x6)") # x4 , x6
+    c2 = Formula.parse("(x4|x6)") # x4 , x6
     c3 =  Formula.parse("(~x1|~x6)") # x1, x5
     # c4 = Formula.parse("x6")
     c5 = Formula.parse("x1")

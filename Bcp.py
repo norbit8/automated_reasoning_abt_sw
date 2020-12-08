@@ -35,13 +35,12 @@ class Bcp:
         #no bcp possible
         if variable not in self.current_watch_literals_map:
             return []
-        stack = list(self.current_watch_literals_map[variable])
+        stack = self.current_watch_literals_map[variable].copy()
         for claus in stack:
             # check for wasfull claus
             if not claus.is_satsfied:
                 if claus.is_bcp_potential(variable):
-                    # if bcp
-                    if claus.all_false(self.current_assignment, variable):
+                    if claus.all_false(self.current_assignment.copy(), variable):
                         # get the new bcp assignment
                         new_assigment_variable, value = claus.get_bcp_assignment(variable)
                         new_assigments.append((new_assigment_variable, value))
@@ -76,25 +75,23 @@ class Bcp:
         for var, assign in new_assignment:
             if var in self.current_assignment.keys():
                 if self.current_assignment[var] != assign:
-
                     return False
             self.current_assignment[var] = assign
-
+        return True
     def bcp_step(self, new_assignment: List[Tuple[str, bool]]):
-        print("new assignment", new_assignment)
         self.update_current_assignment(new_assignment)
         stack = [(variable, assign) for variable,assign in new_assignment]
 
         while stack:
             var, assign  = stack.pop()
-            print("pop variable", var, assign)
             add_to_stack = self.one_bcp_step(var)
-            print("current assignment" , self.current_assignment)
+            # print(var, assign, add_to_stack, self.current_assignment)
             stack += add_to_stack
             if not (self.update_current_assignment(add_to_stack)):
                 return (0,False)
-
-        return self.current_assignment
+        print(self.current_watch_literals_map)
+        print(self.current_assignment)
+        return (1,self.current_assignment)
 
     def show_graph(self):
         plt.subplot(121)
