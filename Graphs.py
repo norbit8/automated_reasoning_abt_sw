@@ -1,8 +1,9 @@
+from __future__ import  annotations
 import networkx as nx
-from Solver import Literal
+from Parser import Literal
 from Formula import Formula
 from typing import List
-from Solver import Claus
+from Parser import Claus
 
 
 def find_uip(g, current_decision_node):
@@ -172,17 +173,17 @@ def conflict_analysis(g, current_decision_node, conflict_node):
 # print(conflict_analysis(graph, x7, c))
 # ------------------------------------------------
 # Lecture 3 - slide 33 example UIPs and Resolution
-# graph2 = nx.DiGraph()
-# x2 = Literal('x2', 3, False)
-# x4 = Literal('x4', 5, True)
-# x9 = Literal('x9', 2, False)
-# x5 = Literal('x5', 5, False)
-# x6 = Literal('x6', 5, True)
-# x7 = Literal('x7', 5, False)
-# c = Literal('c', 5, True)
-# graph2.add_nodes_from([x2, x4, x5, x6, x7, x9, c])
-# graph2.add_edges_from([(x2, x5), (x4, x5), (x4, x6), (x9, x6), (x5, x7), (x6, x7), (x6, c), (x7, c)])
-# print(conflict_analysis(graph2, x4, c))
+graph2 = nx.DiGraph()
+x2 = Literal('x2', 4, False)
+x4 = Literal('x4', 5, True)
+x9 = Literal('x9', 4, False)
+x5 = Literal('x5', 5, False)
+x6 = Literal('x6', 5, True)
+x7 = Literal('x7', 5, False)
+c = Literal('c', 5, True)
+graph2.add_nodes_from([x2, x4, x5, x6, x7, x9, c])
+graph2.add_edges_from([(x2, x5), (x4, x5), (x4, x6), (x9, x6), (x5, x7), (x6, x7), (x6, c), (x7, c)])
+print(conflict_analysis(graph2, x4, c))
 # ------------------------------------------------
 
 # print(x1 in [x3, x4])

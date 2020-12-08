@@ -232,9 +232,9 @@ class Claus:
         return self.possible_watch_literals[:2]
 
     def is_bcp_potential(self, variable):
-        print("claus:", self.formula)
-        print(self.possible_watch_literals)
-        print(self.watch_literals)
+        # print("claus:", self.formula)
+        # print(self.possible_watch_literals)
+        # print(self.watch_literals)
         return len(self.possible_watch_literals) == 0 and len(list(set(self.watch_literals) - {variable})) == 1
 
     def get_new_watch_literal(self, variable):
