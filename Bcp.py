@@ -32,6 +32,26 @@ class Bcp:
             self.current_watch_literals_map[new_watch_literal] = []
         self.current_watch_literals_map[new_watch_literal].append(claus)
 
+    def get_source_and_sink(self,claus, variable):
+        sink = list(claus.watch_literals)
+        sink.remove(variable)
+        sink = sink.pop()
+        source = set(claus.variables) - {sink}
+        return source, sink
+
+
+
+    def add_edges_to_graph(self,claus, source, sink, sink_assignment):
+        if sink in self.current_assignment.keys():
+            if self.current_assignment[sink] != sink_assignment:
+                c = Literal('c', self.current_decision_level, False)
+                edges = [(s,c) for s in source]
+                edges.append((sink,c))
+                self.current_graph.add_edges_from(edges)
+                return
+        edges = [(s, sink) for s in source]
+        self.current_graph.add_edges_from(edges)
+        return
 
     def check_for_one_bcp_assigment(self,variable):
         new_assigments = []
@@ -54,7 +74,9 @@ class Bcp:
                         new_assigment_variable, value = claus.get_bcp_assignment(variable)
                         new_assigments.append((new_assigment_variable, value))
 
-                        # claus.watch_literals = []
+                        # build graph
+                        source, sink = self.get_source_and_sink(claus, variable)
+                        self.add_edges_to_graph(claus, source, sink, value)
 
                     vars = claus.watch_literals
                     for var in vars:
