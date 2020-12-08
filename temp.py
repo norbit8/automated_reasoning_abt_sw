@@ -3,32 +3,34 @@ from tempo import *
 from semantics import *
 from Solver import Claus
 
-def createDic(f,d,counter):
+
+def createDic(f, d, counter):
     phi_G = Formula("x" + str(counter))
-    counter+=1
+    counter += 1
     d[f.id] = phi_G
     if (is_base_formula(f)) or is_variable(f.root):
         return counter
     elif (is_unary(f.root)):
-       return createDic(f.first, d, counter)
+        return createDic(f.first, d, counter)
     else:
         counter = createDic(f.first, d, counter)
         counter = createDic(f.second, d, counter)
         return counter
 
-def createLis(f,d, lis):
+
+def createLis(f, d, lis):
     if (is_base_formula(f) or is_variable(f.root)):
         f_temp = Formula("<->", d[f.id], f)
         lis.append(f_temp)
         return
     if (is_unary(f.root)):
         temp = Formula(f.root, d[f.first.id])
-        f_temp = Formula("<->", d[f.id] ,temp)
+        f_temp = Formula("<->", d[f.id], temp)
         lis.append(f_temp)
-        createLis(f.first,d, lis)
+        createLis(f.first, d, lis)
     else:
         temp = Formula(f.root, d[f.first.id], d[f.second.id])
-        f_temp = Formula("<->", d[f.id] ,temp)
+        f_temp = Formula("<->", d[f.id], temp)
         lis.append(f_temp)
         createLis(f.first, d, lis)
         createLis(f.second, d, lis)
@@ -41,7 +43,8 @@ def get_Tseitinis_list(phi):
     createDic(phi, d, counter)
     lis.append(d[phi.id])
     createLis(phi, d, lis)
-    return lis,d
+    return lis, d
+
 
 def get_literal_from_cnf(f):
     literals = []
@@ -61,19 +64,20 @@ def get_literal_from_cnf(f):
 
     return literals
 
+
 def create_cnf_from_literals(l):
-    if len(l)==1:
+    if len(l) == 1:
         return Formula.parse(l[0])
     else:
         second = create_cnf_from_literals(l[1:])
         first = Formula.parse(l[0])
-        return Formula("|",first,second)
-
+        return Formula("|", first, second)
 
 
 def remove_literal_occurs_twice(f):
     literals = list(set(get_literal_from_cnf(f)))
     return create_cnf_from_literals(literals)
+
 
 def is_clause_tautlogy(f):
     literals = list(set(get_literal_from_cnf(f)))
@@ -87,7 +91,7 @@ def is_clause_tautlogy(f):
     return False
 
 
-def is_clause_BCP(clause,d):
+def is_clause_BCP(clause, d):
     """
     checks whether only one var isnt assign
     :param clause:
@@ -108,36 +112,39 @@ def is_clause_BCP(clause,d):
         else:
             potenital_last_variable = var
             potenital_assign = assign
-            counter+=1
+            counter += 1
         if counter > 1:
             return
     return (potenital_last_variable, potenital_assign)
 
-def BCP(cnf,d):
+
+def BCP(cnf, d):
     bcp_flag = True
     while bcp_flag:
         clause_flag = False
         for clause in cnf:
-            t = is_clause_BCP(clause,d)
+            t = is_clause_BCP(clause, d)
             if (t != None):
                 clause_flag = True
                 if t[0] in d.keys() and d[t[0]] != t[1]:
                     return False
-                d[t[0]]= t[1]
+                d[t[0]] = t[1]
         if not clause_flag:
             bcp_flag = False
 
     return True
 
+
 def list_to_true_cnf(l):
-    if len(l)==1:
+    if len(l) == 1:
         return l[0]
     else:
         second = list_to_true_cnf(l[1:])
         first = l[0]
-        return Formula("&",first,second)
+        return Formula("&", first, second)
 
-def tseitinis_model(f,model, special_dic):
+
+def tseitinis_model(f, model, special_dic):
     if (is_base_formula(f)) or is_variable(f.root):
         model[special_dic[f.id].root] = evaluate(f, model)
     elif (is_unary(f.root)):
@@ -148,6 +155,7 @@ def tseitinis_model(f,model, special_dic):
         tseitinis_model(f.second, model, special_dic)
         model[special_dic[f.id].root] = evaluate(f, model)
     return model
+
 
 def compare_formulas(input_formula, ts_formula, special_dict):
     """
@@ -166,6 +174,7 @@ def compare_formulas(input_formula, ts_formula, special_dict):
         if result_original_formula != result_ts_formula:
             return False
     return True
+
 
 ##Tseitini
 phi = Formula.parse("(((~((p&q)|~(q&r))&~q)&~r13)&r31)")
@@ -189,7 +198,7 @@ print(c)
 # print(true_cnf)
 # print(compare_formulas(phi, f1, special_dict))
 
-#removal
+# removal
 # f = Formula.parse("(w1|(r|(q|(r|(w1|~w2)))))")
 # print(f)
 # f_clean = remove_literal_occurs_twice(f)
