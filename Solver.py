@@ -89,14 +89,6 @@ def main(input_formula):
         0] == 0:  # (msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
         print("UNSAT!")
 
-    # print("before",watch_literal_map)
-    # bcp = Bcp(watch_literal_map)
-    # print(bcp.one_bcp_step(('x6',True)))
-    # print("after", watch_literal_map)
-    #
-    # bcp.one_bcp_step(('x2',True))
-    # b
-
 
 if __name__ == '__main__':
     main('sys.argv[1]')
