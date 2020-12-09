@@ -182,8 +182,8 @@ def parse(str):
     phi = Formula.parse(str)
     Tseitinis_list, special_dict = get_Tseitinis_list(phi)
     f = [remove_literal_occurs_twice(f) for f in convert_to_cnf(Tseitinis_list)]
-    f = [c for c in f if not is_clause_tautlogy(c)]
-    cnf = [Claus(f) for f in convert_to_cnf(Tseitinis_list)]
+    f1 = [c for c in f if not is_clause_tautlogy(c)]
+    cnf = [Claus(f) for f in f1]
     return cnf, phi.variables(), phi
 
 
@@ -294,6 +294,9 @@ class Literal:
 # phi = Formula.parse("(p0&(~p1&(~p2&p3)))")
 # Tseitinis_list, special_dict = get_Tseitinis_list(phi)
 # print(Tseitinis_list)
+# for c in Tseitinis_list[1:]:
+#     print
+#     print(convert_to_cnf([Formula.parse("x"),c]))
 # f1 = convert_to_cnf(["kaki", Formula.parse('(x1<->p0)')])
 # print(f1)
 

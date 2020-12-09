@@ -114,7 +114,7 @@ def part_A(f):
     # pre-proccsing
     satsfible, assignmet_map = get_initial_assignment(f)
     if not satsfible:
-        print("UNSAT")
+        print("UNSAT!")
         return (False, False)
 
     # creating watch literal map
@@ -124,7 +124,7 @@ def part_A(f):
     state, response = bcp.bcp_step(assignmet_map,
                                    PART_A_BCP)  # (msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
     if (state == UNSAT_STATE):
-        print("UNSAT")
+        print("UNSAT!")
         return (False, False)
     elif (state == BCP_OK):
         assignmet_map = response
@@ -145,12 +145,12 @@ def main(input_formula):
     # PART B
     iteration_number = 0
     while len(assignmet_map.keys()) < N:
+        print("solver loop")
         iteration_number += 1
         chosen_literal, chosen_assignment = dlis(assignmet_map.copy(), f)
         # chosen_literal, chosen_assignment = assign_true_assingment(assignmet_map.copy(), f) #TODO remove
         state, response = bcp.bcp_step([(chosen_literal, chosen_assignment)], PART_B_BCP)
         if (state == ADD_CONFLICT_CLAUS):
-            print("GOT CONFLICT")
             # build watch literal for claus add calus to formula and go back to line 104
             formula_original.append(response)
             f = copy.deepcopy(formula_original)
@@ -191,10 +191,11 @@ if __name__ == '__main__':
     # ---- TESTS ----
     # operators = ['->', '<->', '&', '|']
     # neg_or_not_to_neg = ['~', '']
-    # number_of_iterations = 3
+    # number_of_iterations = 100
+    # N = 2
     # while number_of_iterations != 0:
     #     f = ''
-    #     number_of_variables = np.random.randint(10) + 2
+    #     number_of_variables = np.random.randint(N) + 2
     #     for i in range(number_of_variables):
     #         variable = neg_or_not_to_neg[np.random.randint(2)] + f'p{i}'
     #         op = operators[np.random.randint(len(operators))]
@@ -203,6 +204,8 @@ if __name__ == '__main__':
     #         else:
     #             f += '(' + variable + op
     #     f += ')' * (number_of_variables - 2)
+    #     #unsat stat
+    #     f = "(" + f + "<->~" + f + ")"
     #     print("Testing the formula: ", f)
     #     result, final_assignment = main(f)
     #     print("Testing same result (SAT / UNSAT): ",
@@ -214,5 +217,5 @@ if __name__ == '__main__':
     #     number_of_iterations -= 1
     #     print("___________________________________________")
     # ---- TESTS END ----
-    result = Parser.parse("(p0&(~p1&(~p2&p3)))")
-    # print(main(str))
+    str = "((~p0|(p1|p2))<->~(~p0|(p1|p2)))"
+    main(str)

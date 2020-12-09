@@ -89,6 +89,7 @@ class Bcp:
                         self.update_watch_literal_map(new_watch_literal, claus, variable)
                     else:
                         self.remove_watch_literal(variable, claus)
+        print("finish inner loop")
         return new_assigments, build_graph_list
 
     def one_bcp_step(self, variable):
@@ -97,11 +98,13 @@ class Bcp:
         return new_assigments, build_graph_list
 
     def update_current_assignment(self, new_assignment):
+        print("update start")
         for var, assign in new_assignment:
             if var in self.current_assignment.keys():
                 if self.current_assignment[var] != assign:
                     return False
             self.current_assignment[var] = assign
+        print("update end")
         return True
 
     def intialize_graph(self, new_assignment):
@@ -126,6 +129,8 @@ class Bcp:
         self.intialize_graph(new_assignment)
         decision = new_assignment[-1][0]
         while stack:
+            print("bcp loop")
+
             var, assign = stack.pop()
             # print(f"WATCH LIT:  {self.current_watch_literals_map}")
             add_to_stack, build_graph_list = self.one_bcp_step(var)
@@ -137,11 +142,13 @@ class Bcp:
                     # unsat because conflict in PART A (the initialzing part)
                     return (0, False)
                 else:
+                    print("conflict start")
                     # conflict after decision, doint conflict analasis
                     self.update_graph(build_graph_list)
                     c = conflict_analysis(self.current_graph, self.get_node_from_graph(decision),
                                           self.get_node_from_graph("c"))
                     # print("here is conflict!",c, type(c))
+                    print("conflict end")
                     return (2, c)
             self.update_graph(build_graph_list)
         # bcp ok, no conflicts

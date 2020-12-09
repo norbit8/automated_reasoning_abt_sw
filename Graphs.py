@@ -76,7 +76,8 @@ def check_if_should_stop(current_clause, first_uip):
         for lit in current_clause:
             if lit != first_uip and lit.decision_level == first_uip.decision_level:
                 return True  # continue iteration
-        return False
+        if current_clause[current_clause.index(first_uip)].assignment == False:
+            return False
     return True
 
 
