@@ -290,7 +290,7 @@ class Literal:
         return self.variable_name.__hash__()
 
     def __repr__(self):
-        return self.variable_name
+        return self.variable_name + f"\n{self.decision_level}\n{self.assignment}"
 
 
 
