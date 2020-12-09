@@ -40,7 +40,6 @@ def last_assigned_literal(g, list_of_literals, first_uip_dont_take):
         print("Something went wrong, the list of literals is empty!")
         return
     for lit in list_of_literals[1:]:
-
         if lit.decision_level > current_last_ass_literal.decision_level and lit != first_uip_dont_take:
             current_last_ass_literal = lit
     return current_last_ass_literal

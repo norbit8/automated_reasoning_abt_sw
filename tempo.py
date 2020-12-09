@@ -171,6 +171,16 @@ def convert_to_cnf(formula: List[Formula]):
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(q|(r|p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~r|(q|~p))"), dictionary))
                 new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|(r|~p))"), dictionary))
+        else:
+
+            if f.second == '~':
+                dictionary = dict({'p': f.second.first, 'q': f.first})
+                new_cnf.append(Formula.substitute_variables(Formula.parse("(p|q)"), dictionary))
+                new_cnf.append(Formula.substitute_variables(Formula.parse("(~q|~p)"), dictionary))
+            else:
+                dictionary = dict({'p': f.second, 'q': f.first})
+                new_cnf.append(Formula.substitute_variables(Formula.parse("(~p|q)"), dictionary))
+                new_cnf.append(Formula.substitute_variables(Formula.parse("(p|~q)"), dictionary))
     return new_cnf
 
 

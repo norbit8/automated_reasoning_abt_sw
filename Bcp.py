@@ -145,7 +145,7 @@ class Bcp:
                     return (2, c)
             self.update_graph(build_graph_list)
         # bcp ok, no conflicts
-        return (1, self.current_assignment)
+        return 1, self.current_assignment
 
     def show_graph(self):
         # print(self.current_graph.edges)

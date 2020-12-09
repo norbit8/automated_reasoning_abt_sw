@@ -27,6 +27,7 @@ def is_variable(s: str) -> bool:
         return False
     return s[0] >= 'p' and s[0] <= 'z' and (len(s) == 1 or s[1:].isdigit())
 
+
 def is_constant(s: str) -> bool:
     """Checks if the given string is a constant.
     Parameters:
@@ -35,6 +36,7 @@ def is_constant(s: str) -> bool:
         ``True`` if the given string is a constant, ``False`` otherwise.
     """
     return s == 'T' or s == 'F'
+
 
 def is_base_formula(f):
     if is_unary(f.root):
@@ -46,9 +48,6 @@ def is_base_formula(f):
             return  is_variable(f.first.root) and is_unary(f.second.root) and is_variable(f.second.first.root)
         else:
             return (is_variable(f.first.root) and is_variable(f.second.root))
-
-
-
 
 
 def is_unary(s: str) -> bool:

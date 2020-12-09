@@ -6,11 +6,14 @@ import sys
 import Parser
 from Bcp import Bcp, PART_A_BCP, PART_B_BCP
 from collections import Counter
+import numpy as np
 
 # constants
 UNSAT_STATE = 0
 BCP_OK = 1
 ADD_CONFLICT_CLAUS = 2
+SAT = 1
+UNSAT = 0
 
 
 def get_watch_literals_for_clause(claus):
@@ -121,7 +124,7 @@ def part_A(f):
     state, response = bcp.bcp_step(assignmet_map,
                                    PART_A_BCP)  # (msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
     if (state == UNSAT_STATE):
-        print("UNSAT!")
+        print("UNSAT")
         return (False, False)
     elif (state == BCP_OK):
         assignmet_map = response
@@ -130,32 +133,52 @@ def part_A(f):
 
 def main(input_formula):
     # cretes Tsieni
-    f = Parser.parse(input_formula)
+    f, original_variables, original_formula = Parser.parse(input_formula)
     formula_original = copy.deepcopy(f)
     # number of variables in formula
     N = count_variables(f)
     state, response = part_A(f)
     if state == UNSAT_STATE:
-        return False
+        return UNSAT, {}
     else:
         watch_literal_map, assignmet_map, bcp = response
     # PART B
+    iteration_number = 0
     while len(assignmet_map.keys()) < N:
+        iteration_number += 1
         chosen_literal, chosen_assignment = dlis(assignmet_map.copy(), f)
         # chosen_literal, chosen_assignment = assign_true_assingment(assignmet_map.copy(), f) #TODO remove
         state, response = bcp.bcp_step([(chosen_literal, chosen_assignment)], PART_B_BCP)
         if (state == ADD_CONFLICT_CLAUS):
+            print("GOT CONFLICT")
             # build watch literal for claus add calus to formula and go back to line 104
             formula_original.append(response)
             f = copy.deepcopy(formula_original)
             state, response = part_A(f)
             if state == UNSAT_STATE:
-                return False
+                return UNSAT, {}
             else:
                 watch_literal_map, assignmet_map, bcp = response
         elif (state == BCP_OK):
             assignmet_map = response
-    print("SAT!", assignmet_map)
+    # convert assignment to the real one
+    final_assignment = dict()
+    for item in original_variables:
+        final_assignment[item] = assignmet_map[item]
+    print("SAT")
+    return SAT, final_assignment
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
 if __name__ == '__main__':
@@ -163,4 +186,33 @@ if __name__ == '__main__':
     # main('sys.argv[1]')
     # print(is_satisfiable(f))
     # main("((p|q)<->~(p|q))")
-    main("(((((p1->p2)<->(q&p1))&((p33->p12)<->(q3&p4)))|(((p14->p8)<->(q512&p64))&((p82->p79)<->(q555&p95))))<->~((((p1->p2)<->(q&p1))&((p33->p12)<->(q3&p4)))|(((p14->p8)<->(q512&p64))&((p82->p79)<->(q555&p95)))))")
+    # main("(((((p1->p2)<->(q&p1))&((p33->p12)<->(q3&p4)))|(((p14->p8)<->(q512&p64))&((p82->p79)<->(q555&p95))))<->~((((p1->p2)<->(q&p1))&((p33->p12)<->(q3&p4)))|(((p14->p8)<->(q512&p64))&((p82->p79)<->(q555&p95)))))")
+
+    # ---- TESTS ----
+    # operators = ['->', '<->', '&', '|']
+    # neg_or_not_to_neg = ['~', '']
+    # number_of_iterations = 3
+    # while number_of_iterations != 0:
+    #     f = ''
+    #     number_of_variables = np.random.randint(10) + 2
+    #     for i in range(number_of_variables):
+    #         variable = neg_or_not_to_neg[np.random.randint(2)] + f'p{i}'
+    #         op = operators[np.random.randint(len(operators))]
+    #         if i + 1 == number_of_variables:
+    #             f += variable + ")"
+    #         else:
+    #             f += '(' + variable + op
+    #     f += ')' * (number_of_variables - 2)
+    #     print("Testing the formula: ", f)
+    #     result, final_assignment = main(f)
+    #     print("Testing same result (SAT / UNSAT): ",
+    #           bcolors.OKCYAN + "PASSED" + bcolors.ENDC if is_satisfiable(
+    #               Formula.parse(f)) == result else bcolors.WARNING + "FAILED" + bcolors.ENDC)
+    #     if result:
+    #         print("Testing the assigment: ", bcolors.OKCYAN + "PASSED" + bcolors.ENDC
+    #         if evaluate(Formula.parse(f), final_assignment) is True else bcolors.WARNING + "FAILED" + bcolors.ENDC)
+    #     number_of_iterations -= 1
+    #     print("___________________________________________")
+    # ---- TESTS END ----
+    result = Parser.parse("(p0&(~p1&(~p2&p3)))")
+    # print(main(str))

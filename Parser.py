@@ -5,7 +5,6 @@ from tempo import *
 from semantics import *
 
 
-
 def createDic(f, d, counter):
     phi_G = Formula("x" + str(counter))
     counter += 1
@@ -73,7 +72,7 @@ def create_cnf_from_literals(l):
     else:
         second = create_cnf_from_literals(l[1:])
         first = Formula.parse(l[0])
-        return Formula("|",first,second)
+        return Formula("|", first, second)
 
 
 def remove_literal_occurs_twice(f):
@@ -179,20 +178,17 @@ def compare_formulas(input_formula, ts_formula, special_dict):
 
 
 def parse(str):
-    #Tseitini
+    # Tseitini
     phi = Formula.parse(str)
     Tseitinis_list, special_dict = get_Tseitinis_list(phi)
-    f = [remove_literal_occurs_twice(f) for f in  convert_to_cnf(Tseitinis_list)]
+    f = [remove_literal_occurs_twice(f) for f in convert_to_cnf(Tseitinis_list)]
     f = [c for c in f if not is_clause_tautlogy(c)]
-    cnf = [Claus(f) for f in  convert_to_cnf(Tseitinis_list)]
-    return cnf
-
-
+    cnf = [Claus(f) for f in convert_to_cnf(Tseitinis_list)]
+    return cnf, phi.variables(), phi
 
 
 class Claus:
-
-    def __init__(self, formula:Formula):
+    def __init__(self, formula: Formula):
         self.formula = formula
         self.literals = self.convert_to_literals(formula)
         self.number_of_literals = len(self.literals)
@@ -220,7 +216,7 @@ class Claus:
         if self.number_of_literals == 1:
             return self.literals[0][0] != "~"
 
-    def conatin_variabe(self, variable:str):
+    def conatin_variabe(self, variable: str):
         return variable in self.variables
 
     def get_one_watch_literal(self):
@@ -239,7 +235,7 @@ class Claus:
 
     def get_new_watch_literal(self, variable):
         self.watch_literals.remove(variable)
-        new_watch_literal = [self.get_one_watch_literal(),]
+        new_watch_literal = [self.get_one_watch_literal(), ]
         self.watch_literals += new_watch_literal
         return new_watch_literal[0]
 
@@ -247,14 +243,14 @@ class Claus:
         for literal in self.literals:
             if variable in literal:
                 return literal
-        #error
+        # error
         print("problem1")
         exit(1)
 
     def update_possible_literals(self, model):
         self.possible_watch_literals = [var for var in self.possible_watch_literals if var not in model.keys()]
 
-    def all_false(self,model, variable):
+    def all_false(self, model, variable):
         last_unassinged_literal = (set(self.watch_literals) - {variable}).pop()
         literal = self.get_literal(last_unassinged_literal)
         if literal[0] == '~':
@@ -269,7 +265,7 @@ class Claus:
         if literal[0] == '~':
             value = False
         else:
-           value = True
+            value = True
         return last_unassinged_literal, value
 
     def __repr__(self):
@@ -278,7 +274,7 @@ class Claus:
 
 class Literal:
 
-    def __init__(self, variable_name:str, decision_level:int, assignment:bool):
+    def __init__(self, variable_name: str, decision_level: int, assignment: bool):
         self.variable_name = variable_name
         self.decision_level = decision_level
         self.assignment = assignment
@@ -293,6 +289,13 @@ class Literal:
         return self.variable_name + f"\n{self.decision_level}\n{self.assignment}"
 
 
+
+
+# phi = Formula.parse("(p0&(~p1&(~p2&p3)))")
+# Tseitinis_list, special_dict = get_Tseitinis_list(phi)
+# print(Tseitinis_list)
+# f1 = convert_to_cnf(["kaki", Formula.parse('(x1<->p0)')])
+# print(f1)
 
 # print(f1)
 # print(c)
@@ -310,7 +313,7 @@ class Literal:
 # print(is_satisfiable(f1))
 # print(compare_formulas(phi, f1, special_dict))
 
-#removal
+# removal
 # f = Formula.parse("(w1|(r|(q|(r|(w1|~w2)))))")
 # print(f)
 # f_clean = remove_literal_occurs_twice(f)
