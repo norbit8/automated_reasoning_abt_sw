@@ -120,7 +120,7 @@ def create_clause(fake_clause: List[Literal]):
         else:
             list_of_vars.append(lit.variable_name)
     if len(list_of_vars) == 1:
-        return Formula.parse(list_of_vars[0])
+        return Claus(Formula.parse(list_of_vars[0]))
     for index, item in enumerate(list_of_vars):
         if index == len(list_of_vars) - 1:
             formula += item
@@ -188,6 +188,25 @@ def conflict_analysis(g, current_decision_node, conflict_node):
 # print(type(get_node_from_graph(graph2, 'x2')))
 # print(conflict_analysis(graph2, x4, c))
 # ------------------------------------------------
+# Slide 40
+# graph2 = nx.DiGraph()
+# x1 = Literal('x1', 1, True)
+# x4 = Literal('x4', 4, True)
+# x3 = Literal('x3', 3, True)
+# x5 = Literal('x5', 4, True)
+# x6 = Literal('x6', 4, True)
+# x7 = Literal('x7', 4, True)
+# x8 = Literal('x8', 4, True)
+# x9 = Literal('x9', 4, True)
+# x2 = Literal('x2', 2, True)
+# c = Literal('c', 5, True)
+# graph2.add_nodes_from([x1, x2, x3, x4, x5, x6, x7, x8, x9, c])
+# graph2.add_edges_from(
+#     [(x1, x5), (x4, x5), (x4, x6), (x5, x7), (x6, x7), (x7, x8), (x7, x9), (x9, c), (x8, c), (x2, x9)])
+# # print(type(get_node_from_graph(graph2, 'x2')))
+# print(conflict_analysis(graph2, x4, c))
+
+
 
 # print(x1 in [x3, x4])
 # print(create_clause([x3]))

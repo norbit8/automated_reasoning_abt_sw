@@ -2,8 +2,12 @@ import networkx as nx
 from typing import *
 from Parser import Literal
 from Graphs import conflict_analysis
-
 import matplotlib.pyplot as plt
+
+
+#constants
+PART_A_BCP = False
+PART_B_BCP = True
 
 
 class Bcp:
@@ -13,7 +17,7 @@ class Bcp:
         self.current_watch_literals_map = watch_literals
         self.status = []
         self.current_assignment = dict()
-        self.current_decision_level = 0
+        self.current_decision_level = -1
 
     def remove_watch_literal(self, variable, claus):
         if variable in self.current_watch_literals_map.keys():
@@ -49,11 +53,16 @@ class Bcp:
         self.current_graph.add_edges_from(edges)
         return
 
+    def update_graph(self, build_graph_list):
+        for source, sink, value in build_graph_list:
+            self.add_edges_to_graph(source, sink, value)
+
     def check_for_one_bcp_assigment(self, variable):
         new_assigments = []
+        build_graph_list = []
         #no bcp possible
         if variable not in self.current_watch_literals_map:
-            return []
+            return [],[]
         stack = self.current_watch_literals_map[variable].copy()
         for claus in stack:
             claus.update_possible_literals(self.current_assignment.copy())
@@ -66,7 +75,9 @@ class Bcp:
                         new_assigments.append((new_assigment_variable, value))
                         # build graph
                         source, sink = self.get_source_and_sink(claus, variable)
-                        self.add_edges_to_graph(source, sink, value)
+                        build_graph_list.append((source,sink,value))
+
+
                     vars = claus.watch_literals
                     for var in vars:
                         self.remove_watch_literal(var, claus)
@@ -80,12 +91,12 @@ class Bcp:
                         self.update_watch_literal_map(new_watch_literal, claus, variable)
                     else:
                         self.remove_watch_literal(variable, claus)
-        return new_assigments
+        return new_assigments, build_graph_list
 
     def one_bcp_step(self, variable):
         #check for bcp step
-        new_assigments = self.check_for_one_bcp_assigment(variable)
-        return new_assigments
+        new_assigments, build_graph_list = self.check_for_one_bcp_assigment(variable)
+        return new_assigments, build_graph_list
 
     def update_current_assignment(self,new_assignment):
         for var, assign in new_assignment:
@@ -98,8 +109,9 @@ class Bcp:
     def intialize_graph(self,new_assignment):
         nodes = []
         for variable,assign in new_assignment:
-            nodes.append(Literal(variable, self.current_decision_level, assign))
             self.current_decision_level += 1
+            nodes.append(Literal(variable, self.current_decision_level, assign))
+
         self.current_graph.add_nodes_from(nodes)
 
     def get_node_from_graph(self, node_name: str):
@@ -107,20 +119,33 @@ class Bcp:
             if node.variable_name == node_name:
                 return node
 
-    def bcp_step(self, new_assignment: List[Tuple[str, bool]]):
+    def bcp_step(self, new_assignment: List[Tuple[str, bool]], which_part):
+        #if initialzing is non
+        if new_assignment == [] and which_part == PART_A_BCP:
+            return (1, self.current_assignment)
         self.update_current_assignment(new_assignment)
         stack = [(variable, assign) for variable,assign in new_assignment]
         self.intialize_graph(new_assignment)
-        decision = new_assignment[-1]
+        decision = new_assignment[-1][0]
         while stack:
             var, assign  = stack.pop()
-            add_to_stack = self.one_bcp_step(var)
+            add_to_stack, build_graph_list = self.one_bcp_step(var)
             stack += add_to_stack
+            #cehcks for conflict
             if not (self.update_current_assignment(add_to_stack)):
-                c = conflict_analysis(self.current_graph, self.get_node_from_graph("x4"), self.get_node_from_graph("c"))
-                self.show_graph()
-                return (0,False)
-        return (1,self.current_assignment)
+                if which_part == PART_A_BCP:
+                    #unsat because conflict in PART A (the initialzing part)
+                    return (0, False)
+                else:
+                    #conflict after decision, doint conflict analasis
+                    self.update_graph(build_graph_list)
+                    c = conflict_analysis(self.current_graph, self.get_node_from_graph(decision),
+                                          self.get_node_from_graph("c"))
+                    # print("here is conflict!",c, type(c))
+                    return (2, c)
+            self.update_graph(build_graph_list)
+        #bcp ok, no conflicts
+        return (1, self.current_assignment)
 
     def show_graph(self):
         # print(self.current_graph.edges)

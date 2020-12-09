@@ -1,10 +1,15 @@
 from typing import *
 from Formula import Formula, is_binary, is_unary
-from semantics import evaluate
+from semantics import evaluate, is_satisfiable
 import sys
 import Parser
-from Bcp import Bcp
+from Bcp import Bcp, PART_A_BCP, PART_B_BCP
+from collections import Counter
 
+#constants
+UNSAT_STATE = 0
+BCP_OK = 1
+ADD_CONFLICT_CLAUS = 2
 
 def get_watch_literals_for_clause(claus):
     claus.watch_literals = claus.get_two_watch_literals()
@@ -60,35 +65,106 @@ def check_initial_assignment(f):
                 assignment_map[var] = assign
     return satisfiable, assignment_map
 
+def count_variables(f):
+    l = []
+    for claus in f:
+        l +=  claus.variables
+    return len(set(l))
 
-def main(input_formula):
-    ##cretes Tsieni
-    # input_formula = "(~x1|(~x4|(x4|x5)))"
-    # f = Parser.parse(input_formula)
+def get_literal_list(f):
+    literal_list = []
+    for claus in f:
+        literal_list += claus.literals
+    return literal_list
 
-    c1 = Formula.parse("(~x1|(~x4|x5))")
-    c2 = Formula.parse("(~x4|x6)")
-    c3 = Formula.parse("(~x5|(~x6|x7))")
-    c4 = Formula.parse("(~x7|x8)")
-    c5 = Formula.parse("(~x2|(~x7|x9))")
-    c6 = Formula.parse("(~x8|~x9)")
-    c7 = Formula.parse("(~x8|x9)")
+def dlis(assignmet_map, f):
+    counter = Counter(get_literal_list(f))
+    for key in assignmet_map.keys():
+        del counter[key]
+        del counter["~" + key]
+    literal = max(counter, key=counter.get)
+    if literal[0] == "~":
+        return (literal[1:], False)
+    else:
+        return (literal, True)
 
-    l = [c1, c2, c3, c4, c5, c6, c7]
-    f = [Parser.Claus(f) for f in l]
+def get_variable_list(f):
+    literal_list = []
+    for claus in f:
+        literal_list += claus.variables
+    return set(literal_list)
 
+def assign_true_assingment(assignmet_map, f):
+    literals = list(get_variable_list(f) - set(assignmet_map.keys()))
+    literals.sort()
+    return literals[0], True
+
+def part_A(f):
+    # pre-proccsing
     satsfible, assignmet_map = get_initial_assignment(f)
     if not satsfible:
         print("UNSAT")
-        return False
+        return (False, False)
 
+    # creating watch literal map
     watch_literal_map = creates_watch_literals(f)
-    assignmet_map = [("x1", True), ("x2", True), ("x3", True), ("x4", True)]
-    bcp = Bcp(watch_literal_map)
-    if (bcp.bcp_step(assignmet_map))[
-        0] == 0:  # (msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
-        print("UNSAT!")
 
+    # PART A
+    bcp = Bcp(watch_literal_map.copy())
+    state, response = bcp.bcp_step(assignmet_map,
+                                   PART_A_BCP)  # (msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
+    if (state == UNSAT_STATE):
+        print("UNSAT!")
+        return (False, False)
+    elif (state == BCP_OK):
+        assignmet_map = response
+        return (True, (watch_literal_map, assignmet_map, bcp))
+
+
+
+def main(input_formula):
+    ##cretes Tsieni
+    f = Parser.parse(input_formula)
+
+    # f= Formula.parse("((p->q)<->~(p->q))")
+    print(f)
+    #number of variables in formula
+    N = count_variables(f)
+
+    state, response = part_A(f)
+    if state == UNSAT_STATE:
+        return False
+    else:
+        watch_literal_map, assignmet_map, bcp = response
+
+
+    #PART B
+    while len(assignmet_map.keys()) < N:
+        print(assignmet_map)
+        chosen_literal, chosen_assignment = dlis(assignmet_map.copy(), f)
+        print("chose:" , chosen_literal, chosen_assignment)
+        # chosen_literal, chosen_assignment = assign_true_assingment(assignmet_map.copy(), f) #TODO remove
+        state, response = bcp.bcp_step([(chosen_literal,chosen_assignment)], PART_B_BCP)
+        if (state == ADD_CONFLICT_CLAUS):
+            #build watch literal for claus add calus to formula and go back to line 104
+            print("part a", response)
+            f.append(response)
+            state, response = part_A(f)
+            if state == UNSAT_STATE:
+                return False
+            else:
+                watch_literal_map, assignmet_map, bcp = response
+
+        elif (state == BCP_OK):
+            # print("respone", response)
+            assignmet_map = response
+
+
+    print("SAT!", assignmet_map)
 
 if __name__ == '__main__':
-    main('sys.argv[1]')
+    #building input sxample
+    # main('sys.argv[1]')
+    # f = Formula.parse("((((q12&((p12->p22)<->(q1&p2)))&((p1->p2)<->(q&p1)))&((q12&((p12->p22)<->(q1&p2)))&((p1->p2)<->(q&p1))))&(((q12&((p12->p22)<->(q1&p2)))&((p111->p222)<->(q12&p21)))&((q1212&((p1212->p1122)<->(q111&p2222)))&((p1->p2)<->(q&p1)))))")
+    # print(is_satisfiable(f))
+    main("((p|q)<->~(p|q))")

@@ -304,9 +304,10 @@ class Literal:
 # tseitinis_model(phi,model, special_dict)
 # print(model)
 
-
-# true_cnf = list_to_true_cnf(convert_to_cnf(Tseitinis_list))
-# print(true_cnf)
+# phi = Formula.parse("((p->q)<->~(p->q))")
+# Tseitinis_list, special_dict = get_Tseitinis_list(phi)
+# f1 = list_to_true_cnf(convert_to_cnf(Tseitinis_list))
+# print(is_satisfiable(f1))
 # print(compare_formulas(phi, f1, special_dict))
 
 #removal
