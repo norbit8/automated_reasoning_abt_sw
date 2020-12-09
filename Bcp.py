@@ -49,7 +49,7 @@ class Bcp:
         self.current_graph.add_edges_from(edges)
         return
 
-    def check_for_one_bcp_assigment(self,variable):
+    def check_for_one_bcp_assigment(self, variable):
         new_assigments = []
         #no bcp possible
         if variable not in self.current_watch_literals_map:
@@ -66,7 +66,7 @@ class Bcp:
                         new_assigments.append((new_assigment_variable, value))
                         # build graph
                         source, sink = self.get_source_and_sink(claus, variable)
-                        self.add_edges_to_graph(claus, source, sink, value)
+                        self.add_edges_to_graph(source, sink, value)
                     vars = claus.watch_literals
                     for var in vars:
                         self.remove_watch_literal(var, claus)
