@@ -6,6 +6,7 @@ from Parser import Claus
 import networkx as nx
 import matplotlib.pyplot as plt
 
+
 def find_uip(g, current_decision_node):
     """
     Given a graph finds its uip.
@@ -59,7 +60,7 @@ def get_clause(g, node, is_conflict=False):
     if is_conflict:
         fake_clause = []
     else:
-        fake_clause = [Literal(node.variable_name, node.decision_level, not(node.assignment))]
+        fake_clause = [Literal(node.variable_name, node.decision_level, not (node.assignment))]
     list_of_literals = list(g.predecessors(node))
     for lit in list_of_literals:
         new_lit = Literal(lit.variable_name, lit.decision_level, not (lit.assignment))
@@ -133,6 +134,22 @@ def create_clause(fake_clause: List[Literal]):
     return Claus(Formula.parse(formula))
 
 
+def get_conflict(g, conflict_node):
+    s = {conflict_node}
+    result = set()
+    while len(s) != 0:
+        working_node = s.pop()
+        if list(g.predecessors(working_node)) == []:
+            result.add(working_node)
+        else:
+            for predecessor in list(g.predecessors(working_node)):
+                s.add(predecessor)
+    fake_clause = []
+    for item in list(result):
+        fake_clause.append(Literal(item.variable_name, item.decision_level, not (item.assignment)))
+    return create_clause(fake_clause)
+
+
 def conflict_analysis(g, current_decision_node, conflict_node):
     """
     Conflict analysis mode implementation
@@ -149,6 +166,8 @@ def conflict_analysis(g, current_decision_node, conflict_node):
         # if counter > len(g.nodes):
         #     return False
         # print("Conflict clause: ", create_clause(current_clause))
+        if current_clause == []:
+            return get_conflict(g, conflict_node)
         lal = last_assigned_literal(g, current_clause, first_uip)
         # print("Last assigned literal in conflict: ", create_clause([lal]))
         clause = get_clause(g, lal, False)
@@ -156,14 +175,14 @@ def conflict_analysis(g, current_decision_node, conflict_node):
         current_clause = resolve_clause(current_clause, clause)
     return create_clause(current_clause)
 
+
 def show_graph(g):
     # print(self.current_graph.edges)
-    for node in g.nodes:
-        print(node.variable_name, node.decision_level)
+    # for node in g.nodes:
+    #     print(node.variable_name, node.decision_level)
     plt.subplot(121)
     nx.draw(g, with_labels=True, font_weight='bold')
     plt.show()
-
 
 # DG = nx.DiGraph()
 # DG.add_nodes_from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
@@ -217,7 +236,6 @@ def show_graph(g):
 #     [(x1, x5), (x4, x5), (x4, x6), (x5, x7), (x6, x7), (x7, x8), (x7, x9), (x9, c), (x8, c), (x2, x9)])
 # # print(type(get_node_from_graph(graph2, 'x2')))
 # print(conflict_analysis(graph2, x4, c))
-
 
 
 # print(x1 in [x3, x4])

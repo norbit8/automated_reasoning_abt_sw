@@ -151,7 +151,8 @@ def main(input_formula):
         state, response = bcp.bcp_step([(chosen_literal, chosen_assignment)], PART_B_BCP)
         if (state == ADD_CONFLICT_CLAUS):
             # build watch literal for claus add calus to formula and go back to line 104
-            formula_original.append(response)
+            if not(response is False):
+                formula_original.append(response)
             f = copy.deepcopy(formula_original)
             state, response = part_A(f)
             if state == UNSAT_STATE:
@@ -164,6 +165,8 @@ def main(input_formula):
     final_assignment = dict()
     for item in original_variables:
         final_assignment[item] = assignmet_map[item]
+    if not(evaluate(original_formula, final_assignment)):
+        return UNSAT, {}
     print("SAT")
     return SAT, final_assignment
 
@@ -191,7 +194,7 @@ if __name__ == '__main__':
     operators = ['->', '<->', '&', '|']
     neg_or_not_to_neg = ['~', '']
     number_of_iterations = 1000
-    N = 9
+    N = 13
     while number_of_iterations != 0:
         f = ''
         number_of_variables = np.random.randint(N) + 2
@@ -204,7 +207,7 @@ if __name__ == '__main__':
                 f += '(' + variable + op
         f += ')' * (number_of_variables - 2)
         #unsat stat
-        f = "(" + f + "<->~" + f + ")"
+        # f = "(" + f + "<->~" + f + ")"
 
         print("Testing the formula: ", f)
         result, final_assignment = main(f)
@@ -217,5 +220,5 @@ if __name__ == '__main__':
         number_of_iterations -= 1
         print("___________________________________________")
     # ---- TESTS END ----
-    # str = "((p0<->(p1<->(p2<->~p3)))<->~(p0<->(p1<->(p2<->~p3))))"
+    # str = "((~p0<->(p1|(~p2|(p3->(p4&(~p5<->(~p6&(p7&p8))))))))<->~(~p0<->(p1|(~p2|(p3->(p4&(~p5<->(~p6&(p7&p8)))))))))"
     # main(str)

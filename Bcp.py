@@ -143,10 +143,10 @@ class Bcp:
                     c = conflict_analysis(self.current_graph, self.get_node_from_graph(decision),
                                           self.get_node_from_graph("c"))
                     # print("here is conflict!",c, type(c))
-
                     return 2, c
             self.update_graph(build_graph_list)
         # bcp ok, no conflicts
+        # self.current_graph.remove_edges_from(list(self.current_graph.edges))
         return 1, self.current_assignment
 
     def show_graph(self):
