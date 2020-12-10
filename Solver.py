@@ -145,7 +145,6 @@ def main(input_formula):
     # PART B
     iteration_number = 0
     while len(assignmet_map.keys()) < N:
-        print("solver loop")
         iteration_number += 1
         chosen_literal, chosen_assignment = dlis(assignmet_map.copy(), f)
         # chosen_literal, chosen_assignment = assign_true_assingment(assignmet_map.copy(), f) #TODO remove
@@ -189,33 +188,34 @@ if __name__ == '__main__':
     # main("(((((p1->p2)<->(q&p1))&((p33->p12)<->(q3&p4)))|(((p14->p8)<->(q512&p64))&((p82->p79)<->(q555&p95))))<->~((((p1->p2)<->(q&p1))&((p33->p12)<->(q3&p4)))|(((p14->p8)<->(q512&p64))&((p82->p79)<->(q555&p95)))))")
 
     # ---- TESTS ----
-    # operators = ['->', '<->', '&', '|']
-    # neg_or_not_to_neg = ['~', '']
-    # number_of_iterations = 100
-    # N = 2
-    # while number_of_iterations != 0:
-    #     f = ''
-    #     number_of_variables = np.random.randint(N) + 2
-    #     for i in range(number_of_variables):
-    #         variable = neg_or_not_to_neg[np.random.randint(2)] + f'p{i}'
-    #         op = operators[np.random.randint(len(operators))]
-    #         if i + 1 == number_of_variables:
-    #             f += variable + ")"
-    #         else:
-    #             f += '(' + variable + op
-    #     f += ')' * (number_of_variables - 2)
-    #     #unsat stat
-    #     f = "(" + f + "<->~" + f + ")"
-    #     print("Testing the formula: ", f)
-    #     result, final_assignment = main(f)
-    #     print("Testing same result (SAT / UNSAT): ",
-    #           bcolors.OKCYAN + "PASSED" + bcolors.ENDC if is_satisfiable(
-    #               Formula.parse(f)) == result else bcolors.WARNING + "FAILED" + bcolors.ENDC)
-    #     if result:
-    #         print("Testing the assigment: ", bcolors.OKCYAN + "PASSED" + bcolors.ENDC
-    #         if evaluate(Formula.parse(f), final_assignment) is True else bcolors.WARNING + "FAILED" + bcolors.ENDC)
-    #     number_of_iterations -= 1
-    #     print("___________________________________________")
+    operators = ['->', '<->', '&', '|']
+    neg_or_not_to_neg = ['~', '']
+    number_of_iterations = 1000
+    N = 9
+    while number_of_iterations != 0:
+        f = ''
+        number_of_variables = np.random.randint(N) + 2
+        for i in range(number_of_variables):
+            variable = neg_or_not_to_neg[np.random.randint(2)] + f'p{i}'
+            op = operators[np.random.randint(len(operators))]
+            if i + 1 == number_of_variables:
+                f += variable + ")"
+            else:
+                f += '(' + variable + op
+        f += ')' * (number_of_variables - 2)
+        #unsat stat
+        f = "(" + f + "<->~" + f + ")"
+
+        print("Testing the formula: ", f)
+        result, final_assignment = main(f)
+        print("Testing same result (SAT / UNSAT): ",
+              bcolors.OKCYAN + "PASSED" + bcolors.ENDC if is_satisfiable(
+                  Formula.parse(f)) == result else bcolors.WARNING + "FAILED" + bcolors.ENDC)
+        if result:
+            print("Testing the assigment: ", bcolors.OKCYAN + "PASSED" + bcolors.ENDC
+            if evaluate(Formula.parse(f), final_assignment) is True else bcolors.WARNING + "FAILED" + bcolors.ENDC)
+        number_of_iterations -= 1
+        print("___________________________________________")
     # ---- TESTS END ----
-    str = "((~p0|(p1|p2))<->~(~p0|(p1|p2)))"
-    main(str)
+    # str = "((p0<->(p1<->(p2<->~p3)))<->~(p0<->(p1<->(p2<->~p3))))"
+    # main(str)

@@ -3,7 +3,8 @@ from Parser import Literal
 from Formula import Formula
 from typing import List
 from Parser import Claus
-
+import networkx as nx
+import matplotlib.pyplot as plt
 
 def find_uip(g, current_decision_node):
     """
@@ -22,6 +23,8 @@ def find_uip(g, current_decision_node):
         s = s_temp
         if len(s) == 1 and list(g.successors(list(s)[0])) != []:
             uid = s
+        # print("NO CYCLE: ", [cycle for cycle in nx.simple_cycles(g)])
+        # show_graph(g)
     return uid.pop()
 
 
@@ -76,8 +79,8 @@ def check_if_should_stop(current_clause, first_uip):
         for lit in current_clause:
             if lit != first_uip and lit.decision_level == first_uip.decision_level:
                 return True  # continue iteration
-        if current_clause[current_clause.index(first_uip)].assignment == False:
-            return False
+        # if current_clause[current_clause.index(first_uip)].assignment == False:
+        return False
     return True
 
 
@@ -138,11 +141,13 @@ def conflict_analysis(g, current_decision_node, conflict_node):
     :param conflict_node: The conflict node.
     :return: The conflict clause.
     """
-
     first_uip = find_uip(g, current_decision_node)
     current_clause = get_clause(g, conflict_node, True)
-
+    counter = 0
     while check_if_should_stop(current_clause, first_uip):
+        # counter += 1
+        # if counter > len(g.nodes):
+        #     return False
         # print("Conflict clause: ", create_clause(current_clause))
         lal = last_assigned_literal(g, current_clause, first_uip)
         # print("Last assigned literal in conflict: ", create_clause([lal]))
@@ -151,6 +156,13 @@ def conflict_analysis(g, current_decision_node, conflict_node):
         current_clause = resolve_clause(current_clause, clause)
     return create_clause(current_clause)
 
+def show_graph(g):
+    # print(self.current_graph.edges)
+    for node in g.nodes:
+        print(node.variable_name, node.decision_level)
+    plt.subplot(121)
+    nx.draw(g, with_labels=True, font_weight='bold')
+    plt.show()
 
 
 # DG = nx.DiGraph()

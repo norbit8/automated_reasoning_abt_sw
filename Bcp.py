@@ -48,7 +48,8 @@ class Bcp:
                 return
         node = Literal(sink, self.current_decision_level, sink_assignment)
         self.current_graph.add_node(node)
-        edges = [(self.get_node_from_graph(s), self.get_node_from_graph(sink)) for s in source]
+        edges = [(self.get_node_from_graph(s), self.get_node_from_graph(sink)) for s in source if
+                 not (self.get_node_from_graph(sink), self.get_node_from_graph(s)) in self.current_graph.edges]
         self.current_graph.add_edges_from(edges)
         return
 
@@ -89,7 +90,6 @@ class Bcp:
                         self.update_watch_literal_map(new_watch_literal, claus, variable)
                     else:
                         self.remove_watch_literal(variable, claus)
-        print("finish inner loop")
         return new_assigments, build_graph_list
 
     def one_bcp_step(self, variable):
@@ -98,13 +98,11 @@ class Bcp:
         return new_assigments, build_graph_list
 
     def update_current_assignment(self, new_assignment):
-        print("update start")
         for var, assign in new_assignment:
             if var in self.current_assignment.keys():
                 if self.current_assignment[var] != assign:
                     return False
             self.current_assignment[var] = assign
-        print("update end")
         return True
 
     def intialize_graph(self, new_assignment):
@@ -129,8 +127,6 @@ class Bcp:
         self.intialize_graph(new_assignment)
         decision = new_assignment[-1][0]
         while stack:
-            print("bcp loop")
-
             var, assign = stack.pop()
             # print(f"WATCH LIT:  {self.current_watch_literals_map}")
             add_to_stack, build_graph_list = self.one_bcp_step(var)
@@ -140,24 +136,23 @@ class Bcp:
             if not (self.update_current_assignment(add_to_stack)):
                 if which_part == PART_A_BCP:
                     # unsat because conflict in PART A (the initialzing part)
-                    return (0, False)
+                    return 0, False
                 else:
-                    print("conflict start")
                     # conflict after decision, doint conflict analasis
                     self.update_graph(build_graph_list)
                     c = conflict_analysis(self.current_graph, self.get_node_from_graph(decision),
                                           self.get_node_from_graph("c"))
                     # print("here is conflict!",c, type(c))
-                    print("conflict end")
-                    return (2, c)
+
+                    return 2, c
             self.update_graph(build_graph_list)
         # bcp ok, no conflicts
         return 1, self.current_assignment
 
     def show_graph(self):
         # print(self.current_graph.edges)
-        for node in self.current_graph.nodes:
-            print(node.variable_name, node.decision_level)
+        # for node in self.current_graph.nodes:
+        #     print(node.variable_name, node.decision_level)
         plt.subplot(121)
         nx.draw(self.current_graph, with_labels=True, font_weight='bold')
         plt.show()
