@@ -1,12 +1,10 @@
 import copy
 from typing import *
-from Formula import Formula, is_binary, is_unary
-from semantics import evaluate, is_satisfiable
-import sys
-import Parser
-from Bcp import Bcp, PART_A_BCP, PART_B_BCP
+from prop_logic.formula import Formula
+from prop_logic.semantics import evaluate, is_satisfiable
+from parser_util import parser
+from sat_solver.bcp import Bcp, PART_A_BCP, PART_B_BCP
 from collections import Counter
-import numpy as np
 
 # constants
 UNSAT_STATE = 0
@@ -133,7 +131,7 @@ def part_A(f):
 
 def main(input_formula):
     # cretes Tsieni
-    f, original_variables, original_formula = Parser.parse(input_formula)
+    f, original_variables, original_formula = parser.parse(input_formula)
     formula_original = copy.deepcopy(f)
     # number of variables in formula
     N = count_variables(f)
@@ -151,7 +149,7 @@ def main(input_formula):
         state, response = bcp.bcp_step([(chosen_literal, chosen_assignment)], PART_B_BCP)
         if (state == ADD_CONFLICT_CLAUS):
             # build watch literal for claus add calus to formula and go back to line 104
-            if not(response is False):
+            if not (response is False):
                 formula_original.append(response)
             f = copy.deepcopy(formula_original)
             state, response = part_A(f)
@@ -165,60 +163,7 @@ def main(input_formula):
     final_assignment = dict()
     for item in original_variables:
         final_assignment[item] = assignmet_map[item]
-    if not(evaluate(original_formula, final_assignment)):
+    if not (evaluate(original_formula, final_assignment)):
         return UNSAT, {}
     print("SAT")
     return SAT, final_assignment
-
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-
-if __name__ == '__main__':
-    # building input sxample
-    # main('sys.argv[1]')
-    # print(is_satisfiable(f))
-    # main("((p|q)<->~(p|q))")
-    # main("(((((p1->p2)<->(q&p1))&((p33->p12)<->(q3&p4)))|(((p14->p8)<->(q512&p64))&((p82->p79)<->(q555&p95))))<->~((((p1->p2)<->(q&p1))&((p33->p12)<->(q3&p4)))|(((p14->p8)<->(q512&p64))&((p82->p79)<->(q555&p95)))))")
-
-    # ---- TESTS ----
-    operators = ['->', '<->', '&', '|']
-    neg_or_not_to_neg = ['~', '']
-    number_of_iterations = 1000
-    N = 13
-    while number_of_iterations != 0:
-        f = ''
-        number_of_variables = np.random.randint(N) + 2
-        for i in range(number_of_variables):
-            variable = neg_or_not_to_neg[np.random.randint(2)] + f'p{i}'
-            op = operators[np.random.randint(len(operators))]
-            if i + 1 == number_of_variables:
-                f += variable + ")"
-            else:
-                f += '(' + variable + op
-        f += ')' * (number_of_variables - 2)
-        #unsat stat
-        # f = "(" + f + "<->~" + f + ")"
-
-        print("Testing the formula: ", f)
-        result, final_assignment = main(f)
-        print("Testing same result (SAT / UNSAT): ",
-              bcolors.OKCYAN + "PASSED" + bcolors.ENDC if is_satisfiable(
-                  Formula.parse(f)) == result else bcolors.WARNING + "FAILED" + bcolors.ENDC)
-        if result:
-            print("Testing the assigment: ", bcolors.OKCYAN + "PASSED" + bcolors.ENDC
-            if evaluate(Formula.parse(f), final_assignment) is True else bcolors.WARNING + "FAILED" + bcolors.ENDC)
-        number_of_iterations -= 1
-        print("___________________________________________")
-    # ---- TESTS END ----
-    # str = "((~p0<->(p1|(~p2|(p3->(p4&(~p5<->(~p6&(p7&p8))))))))<->~(~p0<->(p1|(~p2|(p3->(p4&(~p5<->(~p6&(p7&p8)))))))))"
-    # main(str)

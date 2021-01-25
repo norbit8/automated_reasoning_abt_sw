@@ -1,8 +1,8 @@
 from __future__ import annotations
-from Parser import Literal
-from Formula import Formula
+from parser_util.parser import Literal
+from prop_logic.formula import Formula
 from typing import List
-from Parser import Claus
+from parser_util.parser import Claus
 import networkx as nx
 import matplotlib.pyplot as plt
 

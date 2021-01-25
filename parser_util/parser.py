@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from Formula import Formula, is_base_formula, is_unary, is_variable
-from tempo import *
-from semantics import *
+from parser_util.parser_helper import *
+from prop_logic.semantics import *
 
 
 def createDic(f, d, counter):

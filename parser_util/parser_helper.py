@@ -1,4 +1,4 @@
-from Formula import *
+from prop_logic.formula import *
 
 
 def helper_nnf(formula: Formula):

@@ -1,7 +1,7 @@
 import networkx as nx
 from typing import *
-from Parser import Literal
-from Graphs import conflict_analysis
+from parser_util.parser import Literal
+from sat_solver.graphs import conflict_analysis
 import matplotlib.pyplot as plt
 
 # constants
