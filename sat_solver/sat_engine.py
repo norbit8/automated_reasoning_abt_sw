@@ -112,7 +112,7 @@ def part_A(f):
     # pre-proccsing
     satsfible, assignmet_map = get_initial_assignment(f)
     if not satsfible:
-        print("UNSAT!")
+        # print("UNSAT!")
         return (False, False)
 
     # creating watch literal map
@@ -122,14 +122,14 @@ def part_A(f):
     state, response = bcp.bcp_step(assignmet_map,
                                    PART_A_BCP)  # (msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
     if (state == UNSAT_STATE):
-        print("UNSAT!")
+        # print("UNSAT!")
         return (False, False)
     elif (state == BCP_OK):
         assignmet_map = response
         return (True, (watch_literal_map, assignmet_map, bcp))
 
 
-def main(input_formula):
+def solve_sat(input_formula):
     # cretes Tsieni
     f, original_variables, original_formula = parser.parse(input_formula)
     formula_original = copy.deepcopy(f)
@@ -165,5 +165,5 @@ def main(input_formula):
         final_assignment[item] = assignmet_map[item]
     if not (evaluate(original_formula, final_assignment)):
         return UNSAT, {}
-    print("SAT")
+    # print("SAT")
     return SAT, final_assignment

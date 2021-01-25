@@ -1,5 +1,5 @@
 import numpy as np
-from sat_solver.sat_engine import main
+from sat_solver.sat_engine import solve_sat
 from prop_logic.formula import Formula
 from prop_logic.semantics import evaluate, is_satisfiable
 
@@ -36,7 +36,7 @@ if __name__ == '__main__':
         # f = "(" + f + "<->~" + f + ")"
 
         print("Testing the formula: ", f)
-        result, final_assignment = main(f)
+        result, final_assignment = solve_sat(f)
         print("Testing same result (SAT / UNSAT): ",
               bcolors.OKCYAN + "PASSED" + bcolors.ENDC if is_satisfiable(
                   Formula.parse(f)) == result else bcolors.WARNING + "FAILED" + bcolors.ENDC)
