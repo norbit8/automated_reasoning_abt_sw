@@ -10,13 +10,15 @@ PART_B_BCP = True
 
 
 class Bcp:
-
-    def __init__(self, watch_literals):
+    def __init__(self, watch_literals, fol_formula = None, susbtitue_formula = None):
         self.current_graph = nx.DiGraph()
         self.current_watch_literals_map = watch_literals
         self.status = []
         self.current_assignment = dict()
         self.current_decision_level = -1
+        self.fol_formula = fol_formula
+        self.susbtitue_formula = susbtitue_formula
+
 
     def remove_watch_literal(self, variable, claus):
         if variable in self.current_watch_literals_map.keys():
@@ -132,7 +134,12 @@ class Bcp:
             add_to_stack, build_graph_list = self.one_bcp_step(var)
             # print(f"?????? {add_to_stack}, {var}")
             stack += add_to_stack
-            # cehcks for conflict
+            #todo wrap with boolean flag is smt or not
+            # if stack == []:
+            #     #t-propogate, will get boolean assismng and add to "add_to_stack"
+            #     pass
+
+            # if partial assisngment is t-conflict
             if not (self.update_current_assignment(add_to_stack)):
                 if which_part == PART_A_BCP:
                     # unsat because conflict in PART A (the initialzing part)
@@ -145,6 +152,9 @@ class Bcp:
                     # print("here is conflict!",c, type(c))
                     return 2, c
             self.update_graph(build_graph_list)
+
+            # todo t-conflict
+
         # bcp ok, no conflicts
         # self.current_graph.remove_edges_from(list(self.current_graph.edges))
         return 1, self.current_assignment

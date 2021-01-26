@@ -5,7 +5,7 @@ from prop_logic.semantics import evaluate, is_satisfiable
 from parser_util import parser
 from sat_solver.bcp import Bcp, PART_A_BCP, PART_B_BCP
 from collections import Counter
-
+from smt_solver_utils.smt_helper import *
 # constants
 UNSAT_STATE = 0
 BCP_OK = 1
@@ -111,6 +111,7 @@ def assign_true_assingment(assignmet_map, f):
 def part_A(f):
     # pre-proccsing
     satsfible, assignmet_map = get_initial_assignment(f)
+    #todo check for t conflict if so , unsat
     if not satsfible:
         # print("UNSAT!")
         return (False, False)
@@ -129,7 +130,12 @@ def part_A(f):
         return (True, (watch_literal_map, assignmet_map, bcp))
 
 
-def solve_sat(input_formula):
+def solve_sat(input_formula, smt_flag = False):
+    if smt_flag:
+        formula_fol_orignial = copy.deepcopy(input_formula)
+        input_formula, substitution_map = formula_fol_orignial.propositional_skeleton()
+        # model_over_formula = model_over_skeleton_to_model_over_formula(model_over_updated_skeleton, substitution_map)
+
     # cretes Tsieni
     f, original_variables, original_formula = parser.parse(input_formula)
     formula_original = copy.deepcopy(f)

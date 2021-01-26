@@ -70,6 +70,7 @@ def union(term1, term2):
         x_rep, y_rep = y_rep, x_rep
     y_rep.represent = x_rep
     x_rep.size = x_rep.size + y_rep.size
+    #todo change to for loop because lecture 8 p25
     if term1.parent != term1 or term2.parent != term2:
         union(term1.parent, term2.parent)
 
