@@ -94,7 +94,6 @@ def get_subterms(formula):
 
 # todo change impl
 def check_congruence_closure(assignment, formula):
-    print("CONGRUENCE")
     subterms = sorted(list(get_subterms(formula)))
     disjoint_set = make_set(subterms)
     equalities = get_equalities(assignment)

@@ -109,14 +109,29 @@ def assign_true_assingment(assignmet_map, f):
     literals.sort()
     return literals[0], True
 
+def convert_to_dic(l):
+    return {k:v for k,v in l}
+
 
 def part_A(f, input_formula_fol=None, substitution_map=None):
     # pre-proccsing
     satsfible, assignmet_map = get_initial_assignment(f)
-    # todo check for t conflict if so , unsat
+    # print("bla" , assignmet_map)
     if not satsfible:
         # print("UNSAT!")
         return (False, False)
+
+    if input_formula_fol != None:
+        ass_map2 = convert_to_dic(assignmet_map)
+        intersected_keys = list(ass_map2.keys() & substitution_map.keys())
+        model_over_formula_filtered = dict()
+        for key in intersected_keys:
+            model_over_formula_filtered[key] = ass_map2[key]
+        model_over_formula = model_over_skeleton_to_model_over_formula(model_over_formula_filtered,
+                                                                       substitution_map)
+        if model_over_formula != {}:
+            if not (check_congruence_closure(model_over_formula, input_formula_fol)):
+                return (False, False)
 
     # creating watch literal map
     watch_literal_map = creates_watch_literals(f)
@@ -137,12 +152,11 @@ def solve_sat(input_formula, smt_flag=False):
     substitution_map = None
     if smt_flag:  # SMT solver part
         fol_formula = copy.deepcopy(input_formula)
+        fol_formula = fol_Formula.parse(fol_formula)
         input_formula, substitution_map = fol_Formula.parse(input_formula).propositional_skeleton()
         # model_over_formula = model_over_skeleton_to_model_over_formula(model_over_updated_skeleton, substitution_map)
-
     # cretes Tsieni
     f, original_variables, original_formula = parser.parse(str(input_formula))
-    print(f)
     formula_original = copy.deepcopy(f)
     # number of variables in formula
     N = count_variables(f)
@@ -163,7 +177,7 @@ def solve_sat(input_formula, smt_flag=False):
             if not (response is False):
                 formula_original.append(response)
             f = copy.deepcopy(formula_original)
-            state, response = part_A(f)
+            state, response = part_A(f, fol_formula, substitution_map)
             if state == UNSAT_STATE:
                 return UNSAT, {}
             else:

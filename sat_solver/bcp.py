@@ -158,20 +158,21 @@ class Bcp:
                 model_over_formula_filtered = dict()
                 for key in intersected_keys:
                     model_over_formula_filtered[key] = self.current_assignment[key]
-                print(self.substitution_map)
                 model_over_formula = model_over_skeleton_to_model_over_formula(model_over_formula_filtered,
                                                                                self.substitution_map)
                 if model_over_formula != {}:
                     if not (check_congruence_closure(model_over_formula, self.fol_formula)):  # THERE IS A T-CONFLICT
+
                         self.update_graph_with_conflict(model_over_formula_filtered)
+                        # self.show_graph()
                         if which_part == PART_A_BCP:
                             # unsat because conflict in PART A (the initialzing part)
                             return 0, False
                         else:
                             # conflict after decision, do conflict analysis
-                            self.update_graph(build_graph_list)
                             c = conflict_analysis(self.current_graph, self.get_node_from_graph(decision),
                                                   self.get_node_from_graph("c"))
+
                             return 2, c
         # bcp ok, no conflicts
         # self.current_graph.remove_edges_from(list(self.current_graph.edges))
@@ -190,7 +191,6 @@ class Bcp:
 
     def update_graph_with_conflict(self, assign_map):
         source = [k for k in assign_map.keys()]
-        print(source)
         c = Literal('c', self.current_decision_level, False)
         edges = [(self.get_node_from_graph(s), c) for s in source]
         self.current_graph.add_edges_from(edges)

@@ -144,27 +144,16 @@ def is_function(s: str) -> bool:
 
 
 def smt_solver(original_formula: fol_Formula):
-    formula = copy.deepcopy(original_formula)
-    skeleton, substitution_map = formula.propositional_skeleton()
-    state, model_over_updated_skeleton = solve_sat(str(skeleton))
-    model_over_formula = model_over_skeleton_to_model_over_formula(model_over_updated_skeleton, substitution_map)
-    congruence_closure_unviolated = check_congruence_closure(model_over_formula, formula)
-    while state:
-        if congruence_closure_unviolated:
-            print("sat")
-            return
-
-        elif not congruence_closure_unviolated:
-            conflict = get_conflict(model_over_updated_skeleton)
-            skeleton = PropositionalFormula("&", skeleton, conflict)
-            state, model_over_updated_skeleton = solve_sat(str(skeleton))
-
-    print("unsat")
-    return
+    print(solve_sat(original_formula, smt_flag=True))
 
 
+
+
+# print(convert_to_dic([("x1",True),("x2",True)]))
+#
 formula1 = fol_Formula.parse('((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d)')  # ((x1|x2)&~x3) x1=T, x3=F
-solve_sat('((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d)', True)
+print(solve_sat('(((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d)&~((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d))', True))
+
 # formula = copy.deepcopy(formula1)
 # skeleton, substitution_map = formula.propositional_skeleton()
 # print(substitution_map)
