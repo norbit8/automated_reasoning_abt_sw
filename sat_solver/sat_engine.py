@@ -6,6 +6,8 @@ from parser_util import parser
 from sat_solver.bcp import Bcp, PART_A_BCP, PART_B_BCP
 from collections import Counter
 from smt_solver_utils.smt_helper import *
+from fol.syntax import Formula as fol_Formula
+
 # constants
 UNSAT_STATE = 0
 BCP_OK = 1
@@ -108,10 +110,10 @@ def assign_true_assingment(assignmet_map, f):
     return literals[0], True
 
 
-def part_A(f):
+def part_A(f, input_formula_fol=None, substitution_map=None):
     # pre-proccsing
     satsfible, assignmet_map = get_initial_assignment(f)
-    #todo check for t conflict if so , unsat
+    # todo check for t conflict if so , unsat
     if not satsfible:
         # print("UNSAT!")
         return (False, False)
@@ -119,29 +121,32 @@ def part_A(f):
     # creating watch literal map
     watch_literal_map = creates_watch_literals(f)
     # PART A
-    bcp = Bcp(watch_literal_map.copy())
+    bcp = Bcp(watch_literal_map.copy(), input_formula_fol, substitution_map)
     state, response = bcp.bcp_step(assignmet_map,
                                    PART_A_BCP)  # (msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
-    if (state == UNSAT_STATE):
+    if state == UNSAT_STATE:
         # print("UNSAT!")
         return (False, False)
-    elif (state == BCP_OK):
+    elif state == BCP_OK:
         assignmet_map = response
         return (True, (watch_literal_map, assignmet_map, bcp))
 
 
-def solve_sat(input_formula, smt_flag = False):
-    if smt_flag:
-        formula_fol_orignial = copy.deepcopy(input_formula)
-        input_formula, substitution_map = formula_fol_orignial.propositional_skeleton()
+def solve_sat(input_formula, smt_flag=False):
+    fol_formula = None
+    substitution_map = None
+    if smt_flag:  # SMT solver part
+        fol_formula = copy.deepcopy(input_formula)
+        input_formula, substitution_map = fol_Formula.parse(input_formula).propositional_skeleton()
         # model_over_formula = model_over_skeleton_to_model_over_formula(model_over_updated_skeleton, substitution_map)
 
     # cretes Tsieni
-    f, original_variables, original_formula = parser.parse(input_formula)
+    f, original_variables, original_formula = parser.parse(str(input_formula))
+    print(f)
     formula_original = copy.deepcopy(f)
     # number of variables in formula
     N = count_variables(f)
-    state, response = part_A(f)
+    state, response = part_A(f, fol_formula, substitution_map)
     if state == UNSAT_STATE:
         return UNSAT, {}
     else:

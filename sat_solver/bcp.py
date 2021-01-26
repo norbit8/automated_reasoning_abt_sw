@@ -3,6 +3,7 @@ from typing import *
 from parser_util.parser import Literal
 from sat_solver.graphs import conflict_analysis
 import matplotlib.pyplot as plt
+from smt_solver_utils.smt_helper import *
 
 # constants
 PART_A_BCP = False
@@ -10,15 +11,15 @@ PART_B_BCP = True
 
 
 class Bcp:
-    def __init__(self, watch_literals, fol_formula = None, susbtitue_formula = None):
+
+    def __init__(self, watch_literals, fol_formula=None, substitution_map=None):
         self.current_graph = nx.DiGraph()
         self.current_watch_literals_map = watch_literals
         self.status = []
         self.current_assignment = dict()
         self.current_decision_level = -1
         self.fol_formula = fol_formula
-        self.susbtitue_formula = susbtitue_formula
-
+        self.substitution_map = substitution_map
 
     def remove_watch_literal(self, variable, claus):
         if variable in self.current_watch_literals_map.keys():
@@ -134,7 +135,7 @@ class Bcp:
             add_to_stack, build_graph_list = self.one_bcp_step(var)
             # print(f"?????? {add_to_stack}, {var}")
             stack += add_to_stack
-            #todo wrap with boolean flag is smt or not
+            # todo wrap with boolean flag is smt or not
             # if stack == []:
             #     #t-propogate, will get boolean assismng and add to "add_to_stack"
             #     pass
@@ -145,16 +146,33 @@ class Bcp:
                     # unsat because conflict in PART A (the initialzing part)
                     return 0, False
                 else:
-                    # conflict after decision, doint conflict analasis
+                    # conflict after decision, do conflict analysis
                     self.update_graph(build_graph_list)
                     c = conflict_analysis(self.current_graph, self.get_node_from_graph(decision),
                                           self.get_node_from_graph("c"))
-                    # print("here is conflict!",c, type(c))
                     return 2, c
             self.update_graph(build_graph_list)
-
-            # todo t-conflict
-
+            # T-CONFLICT
+            if not (self.fol_formula is None):  # SMT KICKS IN IFF FOL FORMULA IS DEFINED
+                intersected_keys = list(self.current_assignment.keys() & self.substitution_map.keys())
+                model_over_formula_filtered = dict()
+                for key in intersected_keys:
+                    model_over_formula_filtered[key] = self.current_assignment[key]
+                print(self.substitution_map)
+                model_over_formula = model_over_skeleton_to_model_over_formula(model_over_formula_filtered,
+                                                                               self.substitution_map)
+                if model_over_formula != {}:
+                    if not (check_congruence_closure(model_over_formula, self.fol_formula)):  # THERE IS A T-CONFLICT
+                        self.update_graph_with_conflict(model_over_formula_filtered)
+                        if which_part == PART_A_BCP:
+                            # unsat because conflict in PART A (the initialzing part)
+                            return 0, False
+                        else:
+                            # conflict after decision, do conflict analysis
+                            self.update_graph(build_graph_list)
+                            c = conflict_analysis(self.current_graph, self.get_node_from_graph(decision),
+                                                  self.get_node_from_graph("c"))
+                            return 2, c
         # bcp ok, no conflicts
         # self.current_graph.remove_edges_from(list(self.current_graph.edges))
         return 1, self.current_assignment
@@ -166,3 +184,14 @@ class Bcp:
         plt.subplot(121)
         nx.draw(self.current_graph, with_labels=True, font_weight='bold')
         plt.show()
+
+    def convert_assign_map_to_list(self, assign_map):
+        return [(k, v) for k, v in assign_map.items()]
+
+    def update_graph_with_conflict(self, assign_map):
+        source = [k for k in assign_map.keys()]
+        print(source)
+        c = Literal('c', self.current_decision_level, False)
+        edges = [(self.get_node_from_graph(s), c) for s in source]
+        self.current_graph.add_edges_from(edges)
+        return

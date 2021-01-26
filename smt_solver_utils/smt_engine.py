@@ -4,12 +4,15 @@ from sat_solver.sat_engine import solve_sat
 from smt_solver_utils.disjoint_set_tree import *
 import copy
 
-#todo change impl
+
+# todo change impl
 def model_over_skeleton_to_model_over_formula(partial_assignment, sub_map):
-    assignment = {sub_map[skeleton_var]: skeleton_var_assignment for skeleton_var, skeleton_var_assignment in partial_assignment.items()}
+    assignment = {sub_map[skeleton_var]: skeleton_var_assignment for skeleton_var, skeleton_var_assignment in
+                  partial_assignment.items()}
     return assignment
 
-#todo change impl
+
+# todo change impl
 def get_equalities(assignment):
     equalities = set()
     for equality in assignment:
@@ -17,7 +20,8 @@ def get_equalities(assignment):
             equalities.add(equality)
     return equalities
 
-#todo change impl
+
+# todo change impl
 def get_inequalities(assignment):
     equalities = set()
     for equality in assignment:
@@ -26,7 +30,7 @@ def get_inequalities(assignment):
     return equalities
 
 
-#todo change impl
+# todo change impl
 def get_subterms(formula):
     if is_equality(formula.root):
         return get_subterms_in_term(formula.arguments[0]).union(get_subterms_in_term(formula.arguments[1]))
@@ -34,7 +38,8 @@ def get_subterms(formula):
         return get_subterms(formula.first)
     return get_subterms(formula.first) | get_subterms(formula.second)
 
-#todo change impl
+
+# todo change impl
 def get_subterms_in_term(term):
     subs = {term}
     if is_function(term.root):
@@ -43,7 +48,7 @@ def get_subterms_in_term(term):
     return subs
 
 
-#todo change impl
+# todo change impl
 def make_set(subterms):
     nodes = dict()
     for term in subterms:
@@ -53,13 +58,15 @@ def make_set(subterms):
                 nodes[arg].parent = nodes[term]
     return nodes.values()
 
-#todo change impl
+
+# todo change impl
 def find(term):
     if term.represent != term:
         term.represent = find(term.represent)
     return term.represent
 
-#todo change impl
+
+# todo change impl
 def union(term1, term2):
     x_rep = find(term1)
     y_rep = find(term2)
@@ -70,11 +77,12 @@ def union(term1, term2):
         x_rep, y_rep = y_rep, x_rep
     y_rep.represent = x_rep
     x_rep.size = x_rep.size + y_rep.size
-    #todo change to for loop because lecture 8 p25
+    # todo change to for loop because lecture 8 p25
     if term1.parent != term1 or term2.parent != term2:
         union(term1.parent, term2.parent)
 
-#todo change impl
+
+# todo change impl
 def get_nodes(equality, disjoint_set):
     node1, node2 = None, None
     for node in disjoint_set:
@@ -86,7 +94,8 @@ def get_nodes(equality, disjoint_set):
             break
     return node1, node2
 
-#todo change impl
+
+# todo change impl
 def check_congruence_closure(assignment, formula):
     subterms = sorted(list(get_subterms(formula)))
     disjoint_set = make_set(subterms)
@@ -101,7 +110,8 @@ def check_congruence_closure(assignment, formula):
             return False
     return True
 
-#todo change impl
+
+# todo change impl
 def get_conflict(assignment):
     formula = '('
     num_vars = len(assignment.keys())
@@ -112,7 +122,7 @@ def get_conflict(assignment):
         else:
             formula += str(a)
         if i == num_vars:
-            formula += ')'*(num_vars-1)
+            formula += ')' * (num_vars - 1)
         else:
             formula += '|'
             if i < num_vars - 1:
@@ -124,12 +134,13 @@ def get_conflict(assignment):
 def is_equality(s: str) -> bool:
     return s == '='
 
+
 def is_unary(s: str) -> bool:
     return s == '~'
 
+
 def is_function(s: str) -> bool:
     return 'f' <= s[0] <= 't' and s.isalnum()
-
 
 
 def smt_solver(original_formula: fol_Formula):
@@ -152,6 +163,11 @@ def smt_solver(original_formula: fol_Formula):
     return
 
 
-formula1 = fol_Formula.parse('((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d)') # ((x1|x2)&~x3) x1=T, x3=F
-print(formula1)
-smt_solver(formula1)
+formula1 = fol_Formula.parse('((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d)')  # ((x1|x2)&~x3) x1=T, x3=F
+solve_sat('((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d)', True)
+# formula = copy.deepcopy(formula1)
+# skeleton, substitution_map = formula.propositional_skeleton()
+# print(substitution_map)
+# model_over_formula = model_over_skeleton_to_model_over_formula(model_over_updated_skeleton, substitution_map)
+# congruence_closure_unviolated = check_congruence_closure(model_over_formula, formula)
+
