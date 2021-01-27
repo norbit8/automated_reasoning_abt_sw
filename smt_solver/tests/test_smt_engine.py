@@ -26,6 +26,12 @@ for s in sat_list:
     assert (smt_solver(s)[0] == 1)
 
 for n in unsat_list:
+    if (smt_solver(n)[0] != 0):
+        print(n)
+        print(smt_solver(n))
     assert (smt_solver(n)[0] == 0)
 
 print("passed!")
+
+
+# print(smt_solver(n2))

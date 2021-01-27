@@ -142,15 +142,9 @@ class Bcp:
                 model_over_formula, filtered_boolean_model = self.convert_boolean_model_to_fol_model()
                 equalities, add_asign = t_propagate(model_over_formula, self.fol_formula)
                 if add_asign != {}:
-                    # print(add_asign)
-                    # print(equalities)
-                    # print(self.fol_map_to_boolean_map)
-                    # print(self.substitution_map)
                     add_to_stack =  self.fol_map_to_bool_map_convertor(add_asign)
-                    # print(add_to_stack)
                     stack += add_to_stack
                     source1 = [self.fol_map_to_boolean_map[k] for k in equalities]
-                    # print(source1, add_to_stack)
                     self.add_edges_to_graph(source1, add_to_stack[0][0], add_to_stack[0][1])
 
             # if partial assisngment is t-conflict
@@ -169,7 +163,7 @@ class Bcp:
             if not (self.fol_formula is None):  # SMT KICKS IN IFF FOL FORMULA IS DEFINED
                 model_over_formula, filtered_boolean_model = self.convert_boolean_model_to_fol_model()
                 if model_over_formula != {}:
-                    if not (check_congruence_closure(model_over_formula, self.fol_formula)):  # THERE IS A T-CONFLICT
+                    if not (congruence_closure_algorithm(model_over_formula, self.fol_formula)):  # THERE IS A T-CONFLICT
                         self.update_graph_with_conflict(filtered_boolean_model)
                         # self.show_graph()
                         if which_part == PART_A_BCP:
@@ -180,14 +174,9 @@ class Bcp:
                             c = conflict_analysis(self.current_graph, self.get_node_from_graph(decision),
                                                   self.get_node_from_graph("c"))
                             return 2, c
-        # bcp ok, no conflicts
-        # self.current_graph.remove_edges_from(list(self.current_graph.edges))
         return 1, self.current_assignment
 
     def show_graph(self):
-        # print(self.current_graph.edges)
-        # for node in self.current_graph.nodes:
-        #     print(node.variable_name, node.decision_level)
         plt.subplot(121)
         nx.draw(self.current_graph, with_labels=True, font_weight='bold')
         plt.show()
@@ -207,8 +196,8 @@ class Bcp:
         model_over_formula_filtered = dict()
         for key in intersected_keys:
             model_over_formula_filtered[key] = self.current_assignment[key]
-        return model_over_skeleton_to_model_over_formula(model_over_formula_filtered,
-                                                                       self.substitution_map), model_over_formula_filtered
+        return switch_assignment_to_fol_assignment(model_over_formula_filtered,
+                                                   self.substitution_map), model_over_formula_filtered
 
     def fol_map_to_bool_map_convertor(self, sub_map):
         assignment = {self.fol_map_to_boolean_map[k]: v for k, v in

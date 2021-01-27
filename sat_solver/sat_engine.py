@@ -127,10 +127,10 @@ def part_A(f, input_formula_fol=None, substitution_map=None):
         model_over_formula_filtered = dict()
         for key in intersected_keys:
             model_over_formula_filtered[key] = ass_map2[key]
-        model_over_formula = model_over_skeleton_to_model_over_formula(model_over_formula_filtered,
-                                                                       substitution_map)
+        model_over_formula = switch_assignment_to_fol_assignment(model_over_formula_filtered,
+                                                                 substitution_map)
         if model_over_formula != {}:
-            if not (check_congruence_closure(model_over_formula, input_formula_fol)):
+            if not (congruence_closure_algorithm(model_over_formula, input_formula_fol)):
                 return (False, False)
 
     # creating watch literal map
