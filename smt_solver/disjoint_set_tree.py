@@ -11,3 +11,8 @@ class Node:
     def __eq__(self, other):
         return Term.__eq__(self.term, other.term)
 
+    def __str__(self):
+        return str(self.term)
+
+    def __repr__(self):
+        return str(self.term)

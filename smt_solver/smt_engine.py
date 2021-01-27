@@ -1,7 +1,7 @@
 from fol.syntax import Formula as fol_Formula
 from prop_logic.formula import Formula as PropositionalFormula
 from sat_solver.sat_engine import solve_sat
-from smt_solver_utils.disjoint_set_tree import *
+from smt_solver.disjoint_set_tree import *
 import copy
 
 
@@ -52,7 +52,7 @@ def get_subterms_in_term(term):
 def make_set(subterms):
     nodes = dict()
     for term in subterms:
-        nodes[term] = (Node(term))
+        nodes[term] = Node(term)
         if is_function(term.root):
             for arg in term.arguments:
                 nodes[arg].parent = nodes[term]
@@ -143,20 +143,20 @@ def is_function(s: str) -> bool:
     return 'f' <= s[0] <= 't' and s.isalnum()
 
 
-def smt_solver(original_formula: fol_Formula):
-    print(solve_sat(original_formula, smt_flag=True))
+def smt_solver(original_formula: str):
+    return solve_sat(original_formula, smt_flag=True)
 
 
 
 
 # print(convert_to_dic([("x1",True),("x2",True)]))
 #
-formula1 = fol_Formula.parse('((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d)')  # ((x1|x2)&~x3) x1=T, x3=F
-print(solve_sat('(((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d)&~((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d))', True))
+# formula1 = fol_Formula.parse('((g(a)=c&(f(g(a))=f(c)|c=g(b)))&~c=d)')  # ((x1|x2)&~x3) x1=T, x3=F
 
 # formula = copy.deepcopy(formula1)
 # skeleton, substitution_map = formula.propositional_skeleton()
 # print(substitution_map)
 # model_over_formula = model_over_skeleton_to_model_over_formula(model_over_updated_skeleton, substitution_map)
 # congruence_closure_unviolated = check_congruence_closure(model_over_formula, formula)
+
 

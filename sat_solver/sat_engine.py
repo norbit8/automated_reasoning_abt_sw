@@ -5,7 +5,7 @@ from prop_logic.semantics import evaluate, is_satisfiable
 from parser_util import parser
 from sat_solver.bcp import Bcp, PART_A_BCP, PART_B_BCP
 from collections import Counter
-from smt_solver_utils.smt_helper import *
+from smt_solver.smt_helper import *
 from fol.syntax import Formula as fol_Formula
 
 # constants

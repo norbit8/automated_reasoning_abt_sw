@@ -3,7 +3,7 @@ from typing import *
 from parser_util.parser import Literal
 from sat_solver.graphs import conflict_analysis
 import matplotlib.pyplot as plt
-from smt_solver_utils.smt_helper import *
+from smt_solver.smt_helper import *
 
 # constants
 PART_A_BCP = False
@@ -20,6 +20,7 @@ class Bcp:
         self.current_decision_level = -1
         self.fol_formula = fol_formula
         self.substitution_map = substitution_map
+        self.fol_map_to_boolean_map = { substitution_map[k]:k for k in substitution_map}
 
     def remove_watch_literal(self, variable, claus):
         if variable in self.current_watch_literals_map.keys():
@@ -136,9 +137,21 @@ class Bcp:
             # print(f"?????? {add_to_stack}, {var}")
             stack += add_to_stack
             # todo wrap with boolean flag is smt or not
-            # if stack == []:
-            #     #t-propogate, will get boolean assismng and add to "add_to_stack"
-            #     pass
+            if stack == []:
+                #t-propogate, will get boolean assismng and add to "add_to_stack"
+                model_over_formula, filtered_boolean_model = self.convert_boolean_model_to_fol_model()
+                equalities, add_asign = t_propagate(model_over_formula, self.fol_formula)
+                if add_asign != {}:
+                    # print(add_asign)
+                    # print(equalities)
+                    # print(self.fol_map_to_boolean_map)
+                    # print(self.substitution_map)
+                    add_to_stack =  self.fol_map_to_bool_map_convertor(add_asign)
+                    # print(add_to_stack)
+                    stack += add_to_stack
+                    source1 = [self.fol_map_to_boolean_map[k] for k in equalities]
+                    # print(source1, add_to_stack)
+                    self.add_edges_to_graph(source1, add_to_stack[0][0], add_to_stack[0][1])
 
             # if partial assisngment is t-conflict
             if not (self.update_current_assignment(add_to_stack)):
@@ -154,16 +167,10 @@ class Bcp:
             self.update_graph(build_graph_list)
             # T-CONFLICT
             if not (self.fol_formula is None):  # SMT KICKS IN IFF FOL FORMULA IS DEFINED
-                intersected_keys = list(self.current_assignment.keys() & self.substitution_map.keys())
-                model_over_formula_filtered = dict()
-                for key in intersected_keys:
-                    model_over_formula_filtered[key] = self.current_assignment[key]
-                model_over_formula = model_over_skeleton_to_model_over_formula(model_over_formula_filtered,
-                                                                               self.substitution_map)
+                model_over_formula, filtered_boolean_model = self.convert_boolean_model_to_fol_model()
                 if model_over_formula != {}:
                     if not (check_congruence_closure(model_over_formula, self.fol_formula)):  # THERE IS A T-CONFLICT
-
-                        self.update_graph_with_conflict(model_over_formula_filtered)
+                        self.update_graph_with_conflict(filtered_boolean_model)
                         # self.show_graph()
                         if which_part == PART_A_BCP:
                             # unsat because conflict in PART A (the initialzing part)
@@ -172,7 +179,6 @@ class Bcp:
                             # conflict after decision, do conflict analysis
                             c = conflict_analysis(self.current_graph, self.get_node_from_graph(decision),
                                                   self.get_node_from_graph("c"))
-
                             return 2, c
         # bcp ok, no conflicts
         # self.current_graph.remove_edges_from(list(self.current_graph.edges))
@@ -195,3 +201,17 @@ class Bcp:
         edges = [(self.get_node_from_graph(s), c) for s in source]
         self.current_graph.add_edges_from(edges)
         return
+
+    def convert_boolean_model_to_fol_model(self):
+        intersected_keys = list(self.current_assignment.keys() & self.substitution_map.keys())
+        model_over_formula_filtered = dict()
+        for key in intersected_keys:
+            model_over_formula_filtered[key] = self.current_assignment[key]
+        return model_over_skeleton_to_model_over_formula(model_over_formula_filtered,
+                                                                       self.substitution_map), model_over_formula_filtered
+
+    def fol_map_to_bool_map_convertor(self, sub_map):
+        assignment = {self.fol_map_to_boolean_map[k]: v for k, v in
+                      sub_map.items()}
+        return [(k,v) for k,v in assignment.items() ]
+

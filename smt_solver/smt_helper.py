@@ -1,4 +1,13 @@
-from smt_solver_utils.disjoint_set_tree import *
+from smt_solver.disjoint_set_tree import *
+
+
+def is_unary(s: str) -> bool:
+    return s == '~'
+
+def is_binary(s: str) -> bool:
+    return s in {'&', '|',  '->', '+', '<->', '-&', '-|'}
+
+
 
 # todo change impl
 def find(term):
@@ -113,3 +122,50 @@ def model_over_skeleton_to_model_over_formula(partial_assignment, sub_map):
     assignment = {sub_map[skeleton_var]: skeleton_var_assignment for skeleton_var, skeleton_var_assignment in
                   partial_assignment.items()}
     return assignment
+
+#todo
+def t_propagate(assignment, formula):
+    final_ass = dict()
+    subterms = sorted(list(get_subterms(formula)))
+    disjoint_set = make_set(subterms)
+    unassigned_equalities = get_equalities_in_formula(formula)
+    equalities = get_equalities(assignment) #f(x)=y -> False & x=y ->True & f(x)=f(y) -> ?
+    inequalities = get_inequalities(assignment)
+    unassigned_equalities = unassigned_equalities - equalities - inequalities
+
+    for equality in equalities:
+        node1, node2 = get_nodes(equality, disjoint_set)
+        union(node1, node2)
+    for equality in unassigned_equalities:
+        left, right = get_nodes(equality, disjoint_set)
+        if find(left) == find(right):
+            final_ass[equality] = True
+        # else:
+        #     for inequality in inequalities:
+        #         left_term, right_term = get_nodes(inequality, disjoint_set)
+        #         if left == left_term or left == right_term:
+        #             common_term, uncommon_term = left, right
+        #         elif right == left_term or right == right_term:
+        #             common_term, uncommon_term = right, left
+        #         else:
+        #             continue
+        #         if common_term == left_term:
+        #             suspect_term = right_term
+        #         else:
+        #             suspect_term = left_term
+        #         if find(uncommon_term) == find(suspect_term):
+        #             assignment[equality] = False
+        #             break
+    return equalities,final_ass
+
+
+#todo
+def get_equalities_in_formula(formula):
+    if is_equality(formula.root):
+        return {formula}
+    elif is_binary(formula.root) or is_unary(formula.root):
+        equalities = get_equalities_in_formula(formula.first)
+        if is_binary(formula.root):
+            equalities = equalities | get_equalities_in_formula(formula.second)
+        return equalities
+
