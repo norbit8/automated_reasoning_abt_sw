@@ -124,7 +124,6 @@ def get_equations(assignment, equality_flag):
     @return:
     """
     equalities_set = set()
-    print("bla: ", assignment)
     for equality in assignment:
         if equality_flag:
             if assignment[equality]:
