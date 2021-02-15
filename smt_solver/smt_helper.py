@@ -1,6 +1,4 @@
-from fol.syntax import Formula as fol_Formula
 from itertools import product
-from fol.syntax import Term
 
 class Node:
     def __init__(self, term):
