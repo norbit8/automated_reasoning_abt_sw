@@ -20,7 +20,7 @@ def ftran(eta_list, a):
 def btran1(eta_list, a):
     if len(eta_list) == 1:
         return a.dot(np.linalg.inv(eta_list[0]))
-    z = ftran(eta_list[1:], a)
+    z = btran1(eta_list[1:], a)
     return z.dot(np.linalg.inv(eta_list[0]))
 
 
