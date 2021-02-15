@@ -14,8 +14,8 @@ EPSILON = 0.0001
 def ftran(eta_list, a):
     if len(eta_list) == 1:
         return np.linalg.inv(eta_list[0]).dot(a)
-    z = ftran(eta_list[1:], a)
-    return np.linalg.inv(eta_list[0]).dot(z)
+    z = ftran(eta_list[:-1], a)
+    return np.linalg.inv(eta_list[-1]).dot(z)
 
 def btran1(eta_list, a):
     if len(eta_list) == 1:
@@ -26,8 +26,8 @@ def btran1(eta_list, a):
 
 def btran(c_N, c_B, B, A_N, B_temp):
     y = c_B @ np.linalg.inv(B)  # get y
-    # y1 = btran1(B_temp, c_B)
-    # print("check: ", y ,y1)
+    y1 = btran1(B_temp, c_B)
+    print("check: ", y , y1)
     entering_var_vector = c_N - (y @ A_N)
     print(f"entering_var_vector: {entering_var_vector}")
     return entering_var_vector
@@ -136,27 +136,27 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
         print("-------------------------------------------------")
 
 #
-# if __name__ == "__main__":
-#     # CLASS EXAMPLE
-#     A = np.array([[3, 2, 1, 2], [1, 1, 1, 1], [4, 3, 3, 4]])
-#     b = np.array([225, 117, 420])
-#     c = np.array([19, 13, 12, 17])
-#     # -------------
-#     res, val = lp_solver(A, b, c, BLAND_RULE)
-#     if res == UNBOUNDED:
-#         print("UNBOUNDED")
-#     elif res == SUCCESS:
-#         print(f"SUCCESS\nMaximal value is: {val}")
-#     else:
-#         print("NO SOLUTION")
+if __name__ == "__main__":
+    # CLASS EXAMPLE
+    A = np.array([[3, 2, 1, 2], [1, 1, 1, 1], [4, 3, 3, 4]])
+    b = np.array([225, 117, 420])
+    c = np.array([19, 13, 12, 17])
+    # -------------
+    res, val = lp_solver(A, b, c, BLAND_RULE)
+    if res == UNBOUNDED:
+        print("UNBOUNDED")
+    elif res == SUCCESS:
+        print(f"SUCCESS\nMaximal value is: {val}")
+    else:
+        print("NO SOLUTION")
 
 
 
 
-
-B = [np.eye(3), np.array([[3., 0., 0.],[1., 1., 0.],[4., 0., 1.]])]
-a = np.array([2,1,3])
-d = np.linalg.inv(reduce(np.dot, B)) @ a
-print(d)
-d1 = ftran(B, a)
-print(d1)
+#
+# B = [np.eye(3), np.array([[3., 0., 0.],[1., 1., 0.],[4., 0., 1.]])]
+# a = np.array([2,1,3])
+# d = np.linalg.inv(reduce(np.dot, B)) @ a
+# print(d)
+# d1 = ftran(B, a)
+# print(d1)
