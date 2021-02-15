@@ -6,6 +6,32 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
+## SAT Solver
+In order to use the SAT solver, you'll need to import `sat_solver.sat_engine` and then calling the function `solve_sat(formula)` where 
+a formula is defined like so
+- An atomic proposition should be a letter in 'p' ... 'z', optionally followed by a sequence of digits. Examples: 'p', 'y12', 'z035'.
+
+- Could have 'T' and 'F' (as True and False respectively).
+
+- ~φ where φ is a valid propositional formula.
+
+- '(φ&ψ)' where each of φ and ψ is a valid propositional formula.
+
+- '(φ|ψ)' where each of φ and ψ is a valid propositional formula.
+
+- '(φ->ψ)' where each of φ and ψ is a valid propositional formula.
+
+Example:
+  ```
+  from sat_solver.sat_engine import *
+  formula = Formula('(~p0|~pq<->(p2<->(p3->p4))))')
+  print(solve_sat(formula))
+  ```
+## SMT Solver
+bla bla
+
+## LP Solver
+bla bla
 
 ## Contributors ✨
 
