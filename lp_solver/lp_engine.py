@@ -88,7 +88,7 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
     c_B = np.zeros(x_B.shape)
     B_eta_mats = [B.copy()]
     # >> Step 0: checking feasibility <<
-    if np.count_nonzero(c > EPSILON) == 0:
+    if np.count_nonzero(c_N > EPSILON) == 0:
         return NO_SOLUTION, None
     while True:  # START REVISED-SIMPLEX ALGORITHM
         if not np.allclose(B.dot(b_star), b):  # Numerical safeguard
@@ -108,7 +108,9 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
         # >> Step 3: FTRAN <<
         d1 = ftran(B_eta_mats, A_N[:, entering_var].copy())
         # >> Step 4: Find the largest t s.t. b - td >= 0 thus getting the leaving variable <<
+
         choose_t = b_star / d1
+
         choose_t = np.where(choose_t > 0, choose_t, np.inf)  # choose_t[choose_t < 0] = np.inf
         leaving_var, t = np.argmin(choose_t), np.min(choose_t)
         b_i_1 = np.eye(B.shape[0])
