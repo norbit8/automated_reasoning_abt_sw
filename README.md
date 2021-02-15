@@ -45,8 +45,29 @@ A valid formula is of the form:
   ```
 
 ## LP Solver :alien:
-bla bla
-
+In order to use the LP solver, you'll need to import `lp_solver.lp_engine.py`.
+Then, you'll need to provide the engine with an Linear programming problem in a form of matricies, and vectors.
+Specifically we're accepting linear program in the form of: 
+  
+  ```
+  Maximize Cx
+  s.t. Ax <= b
+  ```
+### Example
+  ```
+    from lp_solver.lp_engine.py import *
+    A = np.array([[3, 2, 1, 2], [1, 1, 1, 1], [4, 3, 3, 4]])
+    b = np.array([225, 117, 420])
+    c = np.array([19, 13, 12, 17])
+    res, val = lp_solver(A, b, c, BLAND_RULE)
+    if res == UNBOUNDED:
+        print("UNBOUNDED")
+    elif res == SUCCESS:
+        print(f"SUCCESS\nMaximal value is: {val}")
+    else:
+        print("NO SOLUTION")
+  ```
+  
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
