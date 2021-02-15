@@ -129,7 +129,7 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
 
 if __name__ == "__main__":
     """
-    TESTING CLASS EXAMPLE
+    TESTING CLASS EXAMPLE.
     """
     # CLASS EXAMPLE
     A = np.array([[3, 2, 1, 2], [1, 1, 1, 1], [4, 3, 3, 4]])
