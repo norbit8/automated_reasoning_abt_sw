@@ -17,6 +17,11 @@ UNSAT = 0
 
 
 def get_watch_literals_for_clause(claus):
+    """
+    return tuple of the clause watch literals
+    @param claus:
+    @return:
+    """
     claus.watch_literals = claus.get_two_watch_literals()
     claus.possible_watch_literals = list(set(claus.possible_watch_literals) - set(claus.watch_literals))
     return claus.watch_literals
@@ -24,7 +29,8 @@ def get_watch_literals_for_clause(claus):
 
 def add_watch_literals_for_clause(claus, watch_literal_map):
     """
-
+    find two unassigned literals in the clause make the the watch literals. in case of only one literal, it assigend
+    only one
     @param claus:
     @param watch_literal_map:
     @return:
@@ -82,6 +88,11 @@ def check_initial_assignment(f):
 
 
 def count_variables(f):
+    """
+    count the numbers of literals in the formula
+    @param f:
+    @return:
+    """
     l = []
     for claus in f:
         l += claus.variables
@@ -89,6 +100,11 @@ def count_variables(f):
 
 
 def get_literal_list(f):
+    """
+    return the literals of the formula
+    @param f:
+    @return: set of the literals
+    """
     literal_list = []
     for claus in f:
         literal_list += claus.literals
@@ -96,6 +112,12 @@ def get_literal_list(f):
 
 
 def dlis(assignmet_map, f):
+    """
+    implement dlis(dynamic largest individual sum) as taught in class
+    @param assignmet_map:
+    @param f:
+    @return:
+    """
     counter = Counter(get_literal_list(f))
     for key in assignmet_map.keys():
         del counter[key]
@@ -108,6 +130,11 @@ def dlis(assignmet_map, f):
 
 
 def get_variable_list(f):
+    """
+    get all the variables in the ormula
+    @param f:
+    @return:
+    """
     literal_list = []
     for claus in f:
         literal_list += claus.variables
@@ -115,6 +142,12 @@ def get_variable_list(f):
 
 
 def assign_true_assingment(assignmet_map, f):
+    """
+    assign true to unassign literal in formula
+    @param assignmet_map:
+    @param f:
+    @return:
+    """
     literals = list(get_variable_list(f) - set(assignmet_map.keys()))
     literals.sort()
     return literals[0], True
@@ -125,6 +158,13 @@ def convert_to_dic(l):
 
 
 def part_A(f, input_formula_fol=None, substitution_map=None):
+    """
+    this is part A of the bcp algorithm. this is propagete assigment only. if false, unsat
+    @param f:
+    @param input_formula_fol:
+    @param substitution_map:
+    @return:
+    """
     # pre-proccsing
     satsfible, assignmet_map = get_initial_assignment(f)
 
@@ -158,6 +198,12 @@ def part_A(f, input_formula_fol=None, substitution_map=None):
 
 
 def solve_sat(input_formula, smt_flag=False):
+    """
+    main function of sat solver
+    @param input_formula:
+    @param smt_flag:
+    @return:
+    """
     fol_formula = None
     substitution_map = None
     if smt_flag:  # SMT solver part
