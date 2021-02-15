@@ -40,7 +40,6 @@ def get_initial_assignment(f):
 
 def creates_watch_literals(f):
     """
-
     :param f:
     :return:
     """
@@ -136,12 +135,12 @@ def part_A(f, input_formula_fol=None, substitution_map=None):
 
     # creating watch literal map
     watch_literal_map = creates_watch_literals(f)
+
     # PART A
     bcp = Bcp(watch_literal_map.copy(), input_formula_fol, substitution_map)
     state, response = bcp.bcp_step(assignmet_map,
                                    PART_A_BCP)  # (msg_type(int), content) type: 0 - unsat, 1 - assignment, 2- conflict clause
     if state == UNSAT_STATE:
-        # print("UNSAT!")
         return (False, False)
     elif state == BCP_OK:
         assignmet_map = response
@@ -171,7 +170,6 @@ def solve_sat(input_formula, smt_flag=False):
     while len(assignmet_map.keys()) < N:
         iteration_number += 1
         chosen_literal, chosen_assignment = dlis(assignmet_map.copy(), f)
-        # chosen_literal, chosen_assignment = assign_true_assingment(assignmet_map.copy(), f) #TODO remove
         state, response = bcp.bcp_step([(chosen_literal, chosen_assignment)], PART_B_BCP)
         if (state == ADD_CONFLICT_CLAUS):
             # build watch literal for claus add calus to formula and go back to line 104

@@ -11,9 +11,6 @@ class Node:
     def __eq__(self, other):
         return self.term == other.term
 
-    # def __str__(self):
-    #     return str(self.term)
-
     def __hash__(self):
         return hash(self.term)
 
@@ -51,6 +48,7 @@ def process_equality(term1, term2):
 
     if len(term1_representative.parent) < len(term2_representative.parent):
         term1_representative, term2_representative = term2_representative, term1_representative
+
     #term1 is now term2 representative
     term2_representative.representative_node = term1_representative
     #get the product of both term parents
@@ -159,5 +157,3 @@ def get_all_equalities_terms(formula):
         return get_all_equalities_terms(formula.first)
     elif is_binary(formula.root):
         return get_all_equalities_terms(formula.first) | get_all_equalities_terms(formula.second)
-
-
