@@ -7,7 +7,7 @@
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## SAT Solver :robot:
-In order to use the SAT solver, you'll need to import `sat_solver.sat_engine` and then calling the function `solve_sat(formula)` where 
+In order to use the SAT solver, you'll need to import `sat_solver.sat_engine` and then call the function `solve_sat(formula)` where 
 a formula is defined like so
 - An atomic proposition should be a letter in 'p' ... 'z', optionally followed by a sequence of digits. Examples: 'p', 'y12', 'z035'.
 
