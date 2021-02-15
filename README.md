@@ -52,6 +52,7 @@ Specifically we're accepting linear program in the form of:
   ```
   Maximize Cx
   s.t. Ax <= b
+  and x >= 0
   ```
 ### Example
   ```
