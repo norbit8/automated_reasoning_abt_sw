@@ -1,8 +1,10 @@
 ![67532 AUTOMATED REASONING ABOUT SOFTWARE](https://github.com/norbit8/automated_reasoning_abt_sw/blob/main/logo.png?raw=true)
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+![python versions](https://img.shields.io/pypi/pyversions/firebase?style=flat-square)
+<space>
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-[![python versions](https://img.shields.io/pypi/pyversions/firebase?style=flat-square)](#contributors-)
 
 
 ## Contributors ✨
