@@ -23,6 +23,12 @@ def get_watch_literals_for_clause(claus):
 
 
 def add_watch_literals_for_clause(claus, watch_literal_map):
+    """
+
+    @param claus:
+    @param watch_literal_map:
+    @return:
+    """
     literals_list = get_watch_literals_for_clause(claus)
     for lit in literals_list:
         if lit not in watch_literal_map.keys():
@@ -31,6 +37,11 @@ def add_watch_literals_for_clause(claus, watch_literal_map):
 
 
 def get_initial_assignment(f):
+    """
+    get initial assignment for all the clauses with only one literal
+    @param f:
+    @return:
+    """
     satisfiable, assignment_map = check_initial_assignment(f)
     if not satisfiable:
         return (False, False)
@@ -116,9 +127,8 @@ def convert_to_dic(l):
 def part_A(f, input_formula_fol=None, substitution_map=None):
     # pre-proccsing
     satsfible, assignmet_map = get_initial_assignment(f)
-    # print("bla" , assignmet_map)
+
     if not satsfible:
-        # print("UNSAT!")
         return (False, False)
 
     if input_formula_fol != None:
@@ -154,8 +164,8 @@ def solve_sat(input_formula, smt_flag=False):
         fol_formula = copy.deepcopy(input_formula)
         fol_formula = fol_Formula.parse(fol_formula)
         input_formula, substitution_map = fol_Formula.parse(input_formula).propositional_skeleton()
-        # model_over_formula = model_over_skeleton_to_model_over_formula(model_over_updated_skeleton, substitution_map)
-    # cretes Tsieni
+
+    #creates Tsieni
     f, original_variables, original_formula = parser.parse(str(input_formula))
     formula_original = copy.deepcopy(f)
     # number of variables in formula
@@ -165,6 +175,7 @@ def solve_sat(input_formula, smt_flag=False):
         return UNSAT, {}
     else:
         watch_literal_map, assignmet_map, bcp = response
+
     # PART B
     iteration_number = 0
     while len(assignmet_map.keys()) < N:
@@ -183,11 +194,11 @@ def solve_sat(input_formula, smt_flag=False):
                 watch_literal_map, assignmet_map, bcp = response
         elif (state == BCP_OK):
             assignmet_map = response
+
     # convert assignment to the real one
     final_assignment = dict()
     for item in original_variables:
         final_assignment[item] = assignmet_map[item]
     if not (evaluate(original_formula, final_assignment)):
         return UNSAT, {}
-    # print("SAT")
     return SAT, final_assignment
