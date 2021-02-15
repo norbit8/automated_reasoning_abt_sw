@@ -77,8 +77,8 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
     # TODO: LU-factorization on B
     # B = lu_factorization(B)
     # >> Step 0: checking feasibility <<
-    if np.count_nonzero(c > EPSILON) == 0:
-        return NO_SOLUTION, None
+    # if np.count_nonzero(c > EPSILON) == 0:
+    #     return NO_SOLUTION, None
     iter = 1
     while True:  # START REVISED-SIMPLEX ALGORITHM
         print(f"----------Iteration number: {iter}--------------")
@@ -96,7 +96,7 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
         # >> Step 2: getting the entering variable <<
         entering_var = 0
         if np.count_nonzero(entering_var_vector > EPSILON) == 0:  # FOUND OPTIMAL
-            return SUCCESS, parse_result(c_B, c_N, x_B, x_N, b)
+            return SUCCESS, c_B @ b
         if strategy == BLAND_RULE:
             entering_var = blands_rule(entering_var_vector, x_N)
             # print(f"{x_N},\n{entering_var_vector}\nCHOSEN ONE: {entering_var}")
@@ -114,13 +114,16 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
         # TODO: use eta matrices
         d = np.linalg.inv(B) @ A_N[:, entering_var]
         # >> Step 4: Find the largest t s.t. b - td >= 0 thus getting the leaving variable <<
-        leaving_var, t = np.argmin(b / d), np.min(b / d)
+        choose_t = b / d
+        # choose_t[choose_t < 0] = np.inf
+        choose_t = np.where(choose_t > 0, choose_t, np.inf)
+        leaving_var, t = np.argmin(choose_t), np.min(choose_t)
         print("leaving_var: ", leaving_var)
         print("entering_var:", entering_var)
         print("d:", d)
         print("b:", b)
-        print("hilok: ", b / d)
-        if np.count_nonzero(d < 0) != 0:  # d cant be negative
+        print("division b/d=", b / d)
+        if np.count_nonzero(d <= 0) == d.shape[0]:  # d cant be negative
             return UNBOUNDED, None
         # >> Step 5: Swap the entering/leaving columns in B and A_N and in x_B and x_N <<
         c_N[entering_var], c_B[leaving_var] = c_B[leaving_var], c_N[entering_var]
