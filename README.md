@@ -71,11 +71,14 @@ Specifically we're accepting linear program in the form of:
 ## Tests :heart:
 We are providing tests for each of the above solvers, located at
 
-- SAT SOLVER TESTS: /lp_solver/tests/
+- SAT SOLVER TESTS: `/lp_solver/tests/`
+
   The tests run for `number_of_iterations = 1000` by default but you can change the parameter there, just run the file and you're set. 
-- SMT SOLVER TESTS: /smt_solver/tests/
+- SMT SOLVER TESTS: `/smt_solver/tests/`
+
   The tests taken from examples we saw in class, and more self made ones. just run the file and you're set.
-- LP SOLVER TESTS: /lp_solver/tests/
+- LP SOLVER TESTS: `/lp_solver/tests/`
+
   The tests taken from examples we saw in class, and more self made ones. just run the file and you're set.
 
 
