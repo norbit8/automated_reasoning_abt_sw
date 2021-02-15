@@ -6,7 +6,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-## SAT Solver
+## SAT Solver :robot:
 In order to use the SAT solver, you'll need to import `sat_solver.sat_engine` and then calling the function `solve_sat(formula)` where 
 a formula is defined like so
 - An atomic proposition should be a letter in 'p' ... 'z', optionally followed by a sequence of digits. Examples: 'p', 'y12', 'z035'.
@@ -21,16 +21,30 @@ a formula is defined like so
 
 - '(φ->ψ)' where each of φ and ψ is a valid propositional formula.
 
-Example:
+#### Example:
   ```
   from sat_solver.sat_engine import *
-  formula = Formula('(~p0|~pq<->(p2<->(p3->p4))))')
+  formula = '(~p0|~pq<->(p2<->(p3->p4))))'
   print(solve_sat(formula))
   ```
-## SMT Solver
-bla bla
+## SMT Solver :ghost:
+First you'll need to import `smt_solver.smt_engine`.
+Now, using the SMT solver is almost identical to the SAT solver,
+but because its FOL (First order logic) we have introduced functions and the equal sign.
 
-## LP Solver
+A valid formula is of the form:
+
+- A formula as described in the SAT Solver section (above).
+- f(a,b)=c where a, b and c are variables. (Also, the function can have any arity that you'd like)
+
+### Example:
+  ```
+  from smt_solver.smt_engine import *
+  formula_fol = '~((f(a,c)=b&~f(a,g(b))=b)&c=g(b))'
+  print(smt_solver(formula_fol))
+  ```
+
+## LP Solver :alien:
 bla bla
 
 ## Contributors ✨
