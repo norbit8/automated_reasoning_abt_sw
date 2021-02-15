@@ -1,4 +1,6 @@
 # ------- IMPORTS -------
+from functools import reduce
+
 import numpy as np
 from lp_solver.factorization import lu_factor as lu_factorization
 # ------- CONSTANTS -------
@@ -9,28 +11,23 @@ BLAND_RULE = 0
 DANTZIG_RULE = 1
 EPSILON = 0.0001
 
+def ftran(eta_list, a):
+    if len(eta_list) == 1:
+        return np.linalg.inv(eta_list[0]).dot(a)
+    z = ftran(eta_list[1:], a)
+    return np.linalg.inv(eta_list[0]).dot(z)
 
-def parse_result(c_B, c_N, x_B, x_N, b):
-    """
-    Given the arguments below, returns the maximized target function result, and the variables values
-    which maximizes it.
-    :param c_B: Basis vector values.
-    :param c_N: Non basic variables values.
-    :param x_B: Mapping vector from basis vector B to the variable index.
-    :param x_N: Mapping vector from the non-basic vector to the variable index.
-    :param b: b vector.
-    :return: Target function value, the vars value which maximizes it.
-    """
-    c = np.zeros(x_B.shape[0] + x_N.shape[0])
-    x = np.zeros(x_B.shape[0] + x_N.shape[0])
-    c[x_B - 1] = c_B
-    c[x_N - 1] = c_N
-    x[x_B - 1] = b
-    return x @ c
+def btran1(eta_list, a):
+    if len(eta_list) == 1:
+        return a.dot(np.linalg.inv(eta_list[0]))
+    z = ftran(eta_list[1:], a)
+    return z.dot(np.linalg.inv(eta_list[0]))
 
 
-def btran(c_N, c_B, B, A_N):
+def btran(c_N, c_B, B, A_N, B_temp):
     y = c_B @ np.linalg.inv(B)  # get y
+    # y1 = btran1(B_temp, c_B)
+    # print("check: ", y ,y1)
     entering_var_vector = c_N - (y @ A_N)
     print(f"entering_var_vector: {entering_var_vector}")
     return entering_var_vector
@@ -74,50 +71,51 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
     B = np.eye(number_of_slack_vars, number_of_slack_vars)
     c_B = np.zeros(x_B.shape)
     # print("x_n: ", x_N, "\n x_B: ", x_B, "\nB: ", B, c_N, c_B)
-    # TODO: LU-factorization on B
-    B = lu_factorization(B)
+    B_temp = [B.copy(),]
+
     # >> Step 0: checking feasibility <<
-    # if np.count_nonzero(c > EPSILON) == 0:
-    #     return NO_SOLUTION, None
+    if np.count_nonzero(c > EPSILON) == 0:
+        return NO_SOLUTION, None
     iter = 1
+
     while True:  # START REVISED-SIMPLEX ALGORITHM
-        print(f"----------Iteration number: {iter}--------------")
-        print("x_n: ", x_N,
-              "\nx_B: ", x_B,
-              "\nB: ", B,
-              "\nc_N: ", c_N,
-              "\nc_B: ", c_B,
-              "\nA_N:", A_N)
-
-
+        # print(f"----------Iteration number: {iter}--------------")
+        # print("x_n: ", x_N,
+        #       "\nx_B: ", x_B,
+        #       "\nB: ", B,
+        #       "\nc_N: ", c_N,
+        #       "\nc_B: ", c_B,
+        #       "\nA_N:", A_N)
+        # B_temp = lu_factorization(reduce(np.dot, B_temp))
+        print("B_Temp" , B_temp)
+        # print ("let see " , reduce(np.dot, B_temp), B)
         # >> Step 1: BTRAN <<
         # TODO: use eta matrices
-        entering_var_vector = btran(c_N, c_B, B, A_N)
+        entering_var_vector = btran(c_N, c_B, B, A_N, B_temp)
         # >> Step 2: getting the entering variable <<
         entering_var = 0
         if np.count_nonzero(entering_var_vector > EPSILON) == 0:  # FOUND OPTIMAL
             return SUCCESS, c_B @ b
         if strategy == BLAND_RULE:
             entering_var = blands_rule(entering_var_vector, x_N)
-            # print(f"{x_N},\n{entering_var_vector}\nCHOSEN ONE: {entering_var}")
         elif strategy == DANTZIG_RULE:
             entering_var = np.argmax(entering_var_vector)
-        # TODO: delete me, it's a debug because Dr.Guy chose this entering var in his example
-        # if iter == 1:
-        #     entering_var = 2
-        #     print(x_N)
-        # if iter == 2:
-        #     entering_var = 0
-        # if iter == 3:
-        #     entering_var = 3
+
         # >> Step 3: FTRAN <<
         # TODO: use eta matrices
+        d1 = ftran(B_temp, A_N[:, entering_var].copy())
+        print("an" , A_N[:, entering_var].copy())
         d = np.linalg.inv(B) @ A_N[:, entering_var]
+        print("check: d and d1", d, d1 )
+
         # >> Step 4: Find the largest t s.t. b - td >= 0 thus getting the leaving variable <<
         choose_t = b / d
         # choose_t[choose_t < 0] = np.inf
         choose_t = np.where(choose_t > 0, choose_t, np.inf)
         leaving_var, t = np.argmin(choose_t), np.min(choose_t)
+        b_i_1 = np.eye(B.shape[0])
+        b_i_1[:, leaving_var] = d.copy()
+        B_temp.append(b_i_1)
         print("leaving_var: ", leaving_var)
         print("entering_var:", entering_var)
         print("d:", d)
@@ -134,20 +132,31 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
         b[leaving_var] = t
         iter += 1
 
-        print("SO FAR:", parse_result(c_B, c_N, x_B, x_N, b))
+        print("SO FAR:", c_B @ b)
         print("-------------------------------------------------")
 
+#
+# if __name__ == "__main__":
+#     # CLASS EXAMPLE
+#     A = np.array([[3, 2, 1, 2], [1, 1, 1, 1], [4, 3, 3, 4]])
+#     b = np.array([225, 117, 420])
+#     c = np.array([19, 13, 12, 17])
+#     # -------------
+#     res, val = lp_solver(A, b, c, BLAND_RULE)
+#     if res == UNBOUNDED:
+#         print("UNBOUNDED")
+#     elif res == SUCCESS:
+#         print(f"SUCCESS\nMaximal value is: {val}")
+#     else:
+#         print("NO SOLUTION")
 
-if __name__ == "__main__":
-    # CLASS EXAMPLE
-    A = np.array([[3, 2, 1, 2], [1, 1, 1, 1], [4, 3, 3, 4]])
-    b = np.array([225, 117, 420])
-    c = np.array([19, 13, 12, 17])
-    # -------------
-    res, val = lp_solver(A, b, c, BLAND_RULE)
-    if res == UNBOUNDED:
-        print("UNBOUNDED")
-    elif res == SUCCESS:
-        print(f"SUCCESS\nMaximal value is: {val}")
-    else:
-        print("NO SOLUTION")
+
+
+
+
+B = [np.eye(3), np.array([[3., 0., 0.],[1., 1., 0.],[4., 0., 1.]])]
+a = np.array([2,1,3])
+d = np.linalg.inv(reduce(np.dot, B)) @ a
+print(d)
+d1 = ftran(B, a)
+print(d1)
