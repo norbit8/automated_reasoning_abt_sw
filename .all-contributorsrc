@@ -15,6 +15,17 @@
         "test",
         "code"
       ]
+    },
+    {
+      "login": "norbit8",
+      "name": "Yoav",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18491183?v=4",
+      "profile": "https://github.com/norbit8",
+      "contributions": [
+        "infra",
+        "test",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
