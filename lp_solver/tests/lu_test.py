@@ -1,4 +1,4 @@
-from lp.factorization import lu_factor
+from lp_solver.factorization import lu_factor
 import numpy as np
 from scipy.optimize import linprog
 

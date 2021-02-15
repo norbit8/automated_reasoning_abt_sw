@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.linalg
 
 def lu_lfactor(A,start):
     l = []

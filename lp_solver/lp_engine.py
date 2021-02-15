@@ -1,6 +1,6 @@
 # ------- IMPORTS -------
 import numpy as np
-
+from lp_solver.factorization import lu_factor as lu_factorization
 # ------- CONSTANTS -------
 NO_SOLUTION = 0
 SUCCESS = 1
@@ -75,7 +75,7 @@ def lp_solver(A_N: np.array, b: np.array, c_N: np.array, strategy=DANTZIG_RULE):
     c_B = np.zeros(x_B.shape)
     # print("x_n: ", x_N, "\n x_B: ", x_B, "\nB: ", B, c_N, c_B)
     # TODO: LU-factorization on B
-    # B = lu_factorization(B)
+    B = lu_factorization(B)
     # >> Step 0: checking feasibility <<
     # if np.count_nonzero(c > EPSILON) == 0:
     #     return NO_SOLUTION, None
