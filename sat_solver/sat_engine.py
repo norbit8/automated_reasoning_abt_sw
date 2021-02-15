@@ -109,8 +109,9 @@ def assign_true_assingment(assignmet_map, f):
     literals.sort()
     return literals[0], True
 
+
 def convert_to_dic(l):
-    return {k:v for k,v in l}
+    return {k: v for k, v in l}
 
 
 def part_A(f, input_formula_fol=None, substitution_map=None):

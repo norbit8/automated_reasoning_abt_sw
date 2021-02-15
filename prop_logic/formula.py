@@ -14,7 +14,6 @@ MISSING_PARENT = "Missing ')'"
 UNEXPECTED_SYMBOL = "Unexpected symbol"
 
 
-
 def is_variable(s: str) -> bool:
     """Checks if the given string is an atomic proposition.
     Parameters:

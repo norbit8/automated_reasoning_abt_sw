@@ -2,7 +2,7 @@ import networkx as nx
 from typing import *
 from parser_util.parser import Literal
 from sat_solver.graphs import conflict_analysis
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from smt_solver.smt_helper import *
 
 # constants
@@ -20,7 +20,10 @@ class Bcp:
         self.current_decision_level = -1
         self.fol_formula = fol_formula
         self.substitution_map = substitution_map
-        self.fol_map_to_boolean_map = { substitution_map[k]:k for k in substitution_map}
+        if not substitution_map is None:
+            self.fol_map_to_boolean_map = {substitution_map[k]: k for k in substitution_map}
+        else:
+            self.fol_map_to_boolean_map = None
 
     def remove_watch_literal(self, variable, claus):
         if variable in self.current_watch_literals_map.keys():
@@ -132,20 +135,18 @@ class Bcp:
         decision = new_assignment[-1][0]
         while stack:
             var, assign = stack.pop()
-            # print(f"WATCH LIT:  {self.current_watch_literals_map}")
             add_to_stack, build_graph_list = self.one_bcp_step(var)
-            # print(f"?????? {add_to_stack}, {var}")
             stack += add_to_stack
-            # todo wrap with boolean flag is smt or not
-            if stack == []:
-                #t-propogate, will get boolean assismng and add to "add_to_stack"
-                model_over_formula, filtered_boolean_model = self.convert_boolean_model_to_fol_model()
-                equalities, add_asign = t_propagate(model_over_formula, self.fol_formula)
-                if add_asign != {}:
-                    add_to_stack =  self.fol_map_to_bool_map_convertor(add_asign)
-                    stack += add_to_stack
-                    source1 = [self.fol_map_to_boolean_map[k] for k in equalities]
-                    self.add_edges_to_graph(source1, add_to_stack[0][0], add_to_stack[0][1])
+            if self.fol_map_to_boolean_map:
+                if stack == []:
+                    # t-propogate, will get boolean assismng and add to "add_to_stack"
+                    model_over_formula, filtered_boolean_model = self.convert_boolean_model_to_fol_model()
+                    equalities, add_asign = t_propagate(model_over_formula, self.fol_formula)
+                    if add_asign != {}:
+                        add_to_stack = self.fol_map_to_bool_map_convertor(add_asign)
+                        stack += add_to_stack
+                        source1 = [self.fol_map_to_boolean_map[k] for k in equalities]
+                        self.add_edges_to_graph(source1, add_to_stack[0][0], add_to_stack[0][1])
 
             # if partial assisngment is t-conflict
             if not (self.update_current_assignment(add_to_stack)):
@@ -163,7 +164,9 @@ class Bcp:
             if not (self.fol_formula is None):  # SMT KICKS IN IFF FOL FORMULA IS DEFINED
                 model_over_formula, filtered_boolean_model = self.convert_boolean_model_to_fol_model()
                 if model_over_formula != {}:
-                    if not (congruence_closure_algorithm(model_over_formula, self.fol_formula)):  # THERE IS A T-CONFLICT
+                    if not (
+                            congruence_closure_algorithm(model_over_formula,
+                                                         self.fol_formula)):  # THERE IS A T-CONFLICT
                         self.update_graph_with_conflict(filtered_boolean_model)
                         # self.show_graph()
                         if which_part == PART_A_BCP:
@@ -176,10 +179,10 @@ class Bcp:
                             return 2, c
         return 1, self.current_assignment
 
-    def show_graph(self):
-        plt.subplot(121)
-        nx.draw(self.current_graph, with_labels=True, font_weight='bold')
-        plt.show()
+    # def show_graph(self):
+    #     plt.subplot(121)
+    #     nx.draw(self.current_graph, with_labels=True, font_weight='bold')
+    #     plt.show()
 
     def convert_assign_map_to_list(self, assign_map):
         return [(k, v) for k, v in assign_map.items()]
@@ -202,5 +205,4 @@ class Bcp:
     def fol_map_to_bool_map_convertor(self, sub_map):
         assignment = {self.fol_map_to_boolean_map[k]: v for k, v in
                       sub_map.items()}
-        return [(k,v) for k,v in assignment.items() ]
-
+        return [(k, v) for k, v in assignment.items()]
