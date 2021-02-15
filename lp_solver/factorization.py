@@ -26,21 +26,6 @@ def lu_factor(A):
     up = lu_ufactor(low[-1])
     # try:
     low = [np.linalg.inv(i) for i in low[:-1]]
-    # except:
-    #     for i in low:
-    #         print(i)
-
     return low + up[::-1]
 
-
-# A = np.array([ [7, 3, -1, 2], [3, 8, 1, -4], [-1, 1, 4, -1], [2, -4, -1, 6] ])
-# lis = lu_factor(A)
-# for a in lis:
-#     print(a)
-#
-# res = lis[0]
-#
-# for a in lis[1:]:
-#     res = res.dot(a)
-# print(np.round(res))
 
